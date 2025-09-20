@@ -1,0 +1,922 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Ventas Simple</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f5f5f5;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px 20px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .tabs {
+            display: flex;
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+        }
+
+        .tab-button {
+            flex: 1;
+            padding: 15px 20px;
+            background: white;
+            border: none;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            border-bottom: 3px solid transparent;
+        }
+
+        .tab-button:hover {
+            background-color: #f8f9ff;
+        }
+
+        .tab-button.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-bottom-color: #4a5fff;
+        }
+
+        .tab-content {
+            background: white;
+            border-radius: 10px;
+            padding: 25px;
+            box-shadow: 0 2px 15px rgba(0,0,0,0.08);
+            min-height: 400px;
+        }
+
+        .tab-pane {
+            display: none;
+        }
+
+        .tab-pane.active {
+            display: block;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: #555;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e1e5e9;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #56ab2f 0%, #a8e6cf 100%);
+            color: white;
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #ff416c 0%, #ff4b2b 100%);
+            color: white;
+        }
+
+        .btn-warning {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none !important;
+            box-shadow: none !important;
+        }
+
+        .btn-sm {
+            padding: 8px 16px;
+            font-size: 0.9rem;
+        }
+
+        .table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+
+        .table th,
+        .table td {
+            padding: 15px;
+            text-align: left;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        .table th {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            font-weight: 600;
+            color: #495057;
+        }
+
+        .table tr:hover {
+            background-color: #f8f9ff;
+        }
+
+        .alert {
+            padding: 15px 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border-left: 4px solid;
+        }
+
+        .alert-success {
+            background-color: #d4edda;
+            border-left-color: #28a745;
+            color: #155724;
+        }
+
+        .alert-error {
+            background-color: #f8d7da;
+            border-left-color: #dc3545;
+            color: #721c24;
+        }
+
+        .alert-info {
+            background-color: #cce7ff;
+            border-left-color: #007bff;
+            color: #004085;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 25px;
+            border-radius: 15px;
+            text-align: center;
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .stat-value {
+            font-size: 2.5rem;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            font-size: 1rem;
+            opacity: 0.9;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+        }
+
+        .spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+            display: inline-block;
+            margin-right: 10px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+        }
+
+        .modal-content {
+            background-color: white;
+            margin: 15% auto;
+            padding: 30px;
+            border-radius: 15px;
+            width: 90%;
+            max-width: 500px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            text-align: center;
+        }
+
+        .modal h3 {
+            margin-bottom: 20px;
+            color: #333;
+        }
+
+        .modal p {
+            margin-bottom: 25px;
+            color: #666;
+            font-size: 1.1rem;
+        }
+
+        .modal-buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+        }
+
+        .no-data {
+            text-align: center;
+            padding: 40px;
+            color: #999;
+            font-style: italic;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .tabs {
+                flex-direction: column;
+            }
+            
+            .tab-content {
+                padding: 15px;
+            }
+            
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .modal-content {
+                margin: 10% auto;
+                width: 95%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🛒 Sistema de Ventas</h1>
+            <p>Gestión simple y eficiente de productos y ventas diarias</p>
+        </div>
+
+        <div class="tabs">
+            <button class="tab-button active" onclick="showTab('ventas')">📊 Ventas del Día</button>
+            <button class="tab-button" onclick="showTab('productos')">🏷️ Productos</button>
+            <button class="tab-button" onclick="showTab('reportes')">📈 Reportes</button>
+        </div>
+
+        <div class="tab-content">
+            <!-- Tab Ventas -->
+            <div id="ventas" class="tab-pane active">
+                <h2>Registrar Nueva Venta</h2>
+                <form id="ventaForm">
+                    <div class="form-group">
+                        <label for="producto_id">Producto:</label>
+                        <select id="producto_id" class="form-control" required>
+                            <option value="">Seleccionar producto...</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="cantidad">Cantidad:</label>
+                        <input type="number" id="cantidad" class="form-control" min="1" value="1" required>
+                    </div>
+                    <button type="submit" class="btn btn-success">✅ Registrar Venta</button>
+                </form>
+
+                <h3 style="margin-top: 30px;">Ventas de Hoy</h3>
+                <div id="ventasHoy"></div>
+            </div>
+
+            <!-- Tab Productos -->
+            <div id="productos" class="tab-pane">
+                <h2>Gestión de Productos</h2>
+                <form id="productoForm">
+                    <div class="form-group">
+                        <label for="nombre_producto">Nombre del Producto:</label>
+                        <input type="text" id="nombre_producto" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="precio_producto">Precio:</label>
+                        <input type="number" id="precio_producto" class="form-control" step="0.01" min="0" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary" id="btnProducto">➕ Agregar Producto</button>
+                    <button type="button" class="btn btn-warning" id="btnCancelar" onclick="cancelarEdicion()" style="display: none;">❌ Cancelar</button>
+                </form>
+
+                <h3 style="margin-top: 30px;">Lista de Productos</h3>
+                <div id="listaProductos"></div>
+            </div>
+
+            <!-- Tab Reportes -->
+            <div id="reportes" class="tab-pane">
+                <h2>Estadísticas y Reportes</h2>
+                <div class="form-group">
+                    <label for="fecha_reporte">Fecha del reporte:</label>
+                    <input type="date" id="fecha_reporte" class="form-control" onchange="cargarReportes()">
+                </div>
+
+                <div id="estadisticasContainer"></div>
+                <div id="reporteContainer"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Confirmación -->
+    <div id="confirmModal" class="modal">
+        <div class="modal-content">
+            <h3>⚠️ Confirmar Eliminación</h3>
+            <p id="confirmMessage">¿Estás seguro de que deseas eliminar este elemento?</p>
+            <div class="modal-buttons">
+                <button class="btn btn-danger" onclick="confirmarEliminacion()">🗑️ Sí, Eliminar</button>
+                <button class="btn btn-primary" onclick="cerrarModal()">❌ Cancelar</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Variables globales
+        let editandoProducto = null;
+        let elementoAEliminar = null;
+        let tipoEliminacion = null;
+
+        // Inicializar la aplicación
+        document.addEventListener('DOMContentLoaded', function() {
+            cargarProductos();
+            cargarVentasHoy();
+            
+            // Establecer fecha actual en el reporte
+            const fechaHoy = new Date().toISOString().split('T')[0];
+            document.getElementById('fecha_reporte').value = fechaHoy;
+            cargarReportes();
+
+            // Event listeners para los formularios
+            document.getElementById('productoForm').addEventListener('submit', manejarProducto);
+            document.getElementById('ventaForm').addEventListener('submit', registrarVenta);
+        });
+
+        // ==================== GESTIÓN DE TABS ====================
+        function showTab(tabName) {
+            // Ocultar todas las pestañas
+            const tabs = document.querySelectorAll('.tab-pane');
+            tabs.forEach(tab => tab.classList.remove('active'));
+            
+            // Mostrar la pestaña seleccionada
+            document.getElementById(tabName).classList.add('active');
+            
+            // Actualizar botones de pestañas
+            const buttons = document.querySelectorAll('.tab-button');
+            buttons.forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+
+            // Recargar datos según la pestaña
+            if (tabName === 'ventas') {
+                cargarProductos();
+                cargarVentasHoy();
+            } else if (tabName === 'productos') {
+                cargarProductos();
+            } else if (tabName === 'reportes') {
+                cargarReportes();
+            }
+        }
+
+        // ==================== GESTIÓN DE PRODUCTOS ====================
+        async function cargarProductos() {
+            try {
+                const response = await fetch('/api/productos');
+                const productos = await response.json();
+                
+                // Actualizar dropdown de ventas
+                const select = document.getElementById('producto_id');
+                select.innerHTML = '<option value="">Seleccionar producto...</option>';
+                
+                productos.forEach(producto => {
+                    const option = document.createElement('option');
+                    option.value = producto.id;
+                    option.textContent = `${producto.nombre} - $${formatearPrecio(producto.precio)}`;
+                    select.appendChild(option);
+                });
+
+                // Actualizar lista de productos
+                mostrarListaProductos(productos);
+            } catch (error) {
+                mostrarError('Error al cargar productos: ' + error.message);
+            }
+        }
+
+        function mostrarListaProductos(productos) {
+            const container = document.getElementById('listaProductos');
+            
+            if (productos.length === 0) {
+                container.innerHTML = '<div class="no-data">No hay productos registrados</div>';
+                return;
+            }
+
+            let html = `
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Nombre</th>
+                            <th>Precio</th>
+                            <th>Fecha Creación</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+            `;
+
+            productos.forEach(producto => {
+                html += `
+                    <tr>
+                        <td><strong>${producto.nombre}</strong></td>
+                        <td>$${formatearPrecio(producto.precio)}</td>
+                        <td>${formatearFecha(producto.fecha_creacion)}</td>
+                        <td>
+                            <button class="btn btn-warning btn-sm" onclick="editarProducto(${producto.id}, '${producto.nombre}', ${producto.precio})">
+                                ✏️ Editar
+                            </button>
+                            <button class="btn btn-danger btn-sm" onclick="eliminarProducto(${producto.id}, '${producto.nombre}')">
+                                🗑️ Eliminar
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            });
+
+            html += '</tbody></table>';
+            container.innerHTML = html;
+        }
+
+        async function manejarProducto(event) {
+            event.preventDefault();
+            
+            const nombre = document.getElementById('nombre_producto').value.trim();
+            const precio = parseFloat(document.getElementById('precio_producto').value);
+
+            if (!nombre || !precio) {
+                mostrarError('Por favor completa todos los campos');
+                return;
+            }
+
+            try {
+                let response;
+                
+                if (editandoProducto) {
+                    // Actualizar producto existente
+                    response = await fetch(`/api/productos/${editandoProducto}`, {
+                        method: 'PUT',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ nombre, precio })
+                    });
+                } else {
+                    // Crear nuevo producto
+                    response = await fetch('/api/productos', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ nombre, precio })
+                    });
+                }
+
+                const result = await response.json();
+
+                if (response.ok) {
+                    mostrarExito(editandoProducto ? 'Producto actualizado correctamente' : 'Producto creado correctamente');
+                    limpiarFormularioProducto();
+                    cargarProductos();
+                } else {
+                    mostrarError(result.error || 'Error al procesar producto');
+                }
+            } catch (error) {
+                mostrarError('Error al procesar producto: ' + error.message);
+            }
+        }
+
+        function editarProducto(id, nombre, precio) {
+            editandoProducto = id;
+            document.getElementById('nombre_producto').value = nombre;
+            document.getElementById('precio_producto').value = precio;
+            document.getElementById('btnProducto').textContent = '💾 Actualizar Producto';
+            document.getElementById('btnCancelar').style.display = 'inline-block';
+        }
+
+        function cancelarEdicion() {
+            limpiarFormularioProducto();
+        }
+
+        function limpiarFormularioProducto() {
+            editandoProducto = null;
+            document.getElementById('productoForm').reset();
+            document.getElementById('btnProducto').textContent = '➕ Agregar Producto';
+            document.getElementById('btnCancelar').style.display = 'none';
+        }
+
+        function eliminarProducto(id, nombre) {
+            elementoAEliminar = id;
+            tipoEliminacion = 'producto';
+            document.getElementById('confirmMessage').textContent = 
+                `¿Estás seguro de que deseas eliminar el producto "${nombre}"? Esta acción no se puede deshacer.`;
+            document.getElementById('confirmModal').style.display = 'block';
+        }
+
+        // ==================== GESTIÓN DE VENTAS ====================
+        async function cargarVentasHoy() {
+            try {
+                const response = await fetch('/api/ventas');
+                const ventas = await response.json();
+                mostrarVentasHoy(ventas);
+            } catch (error) {
+                mostrarError('Error al cargar ventas: ' + error.message);
+            }
+        }
+
+        function mostrarVentasHoy(ventas) {
+            const container = document.getElementById('ventasHoy');
+            
+            if (ventas.length === 0) {
+                container.innerHTML = '<div class="no-data">No hay ventas registradas hoy</div>';
+                return;
+            }
+
+            let totalVentas = ventas.reduce((sum, venta) => sum + parseFloat(venta.total), 0);
+            
+            let html = `
+                <div class="alert alert-info">
+                    <strong>Total de ventas hoy: $${formatearPrecio(totalVentas)}</strong> 
+                    (${ventas.length} venta${ventas.length !== 1 ? 's' : ''})
+                </div>
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Producto</th>
+                            <th>Cantidad</th>
+                            <th>Precio Unit.</th>
+                            <th>Total</th>
+                            <th>Hora</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+            `;
+
+            ventas.forEach(venta => {
+                html += `
+                    <tr>
+                        <td><strong>${venta.producto_nombre}</strong></td>
+                        <td>${venta.cantidad}</td>
+                        <td>$${formatearPrecio(venta.precio_unitario)}</td>
+                        <td><strong>$${formatearPrecio(venta.total)}</strong></td>
+                        <td>${formatearHora(venta.hora_venta)}</td>
+                        <td>
+                            <button class="btn btn-danger btn-sm" onclick="eliminarVenta(${venta.id}, '${venta.producto_nombre}')">
+                                🗑️ Eliminar
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            });
+
+            html += '</tbody></table>';
+            container.innerHTML = html;
+        }
+
+        async function registrarVenta(event) {
+            event.preventDefault();
+            
+            const producto_id = document.getElementById('producto_id').value;
+            const cantidad = parseInt(document.getElementById('cantidad').value);
+
+            if (!producto_id || !cantidad) {
+                mostrarError('Por favor selecciona un producto y especifica la cantidad');
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/ventas', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ producto_id, cantidad })
+                });
+
+                const result = await response.json();
+
+                if (response.ok) {
+                    mostrarExito('Venta registrada correctamente');
+                    document.getElementById('ventaForm').reset();
+                    document.getElementById('cantidad').value = 1;
+                    cargarVentasHoy();
+                } else {
+                    mostrarError(result.error || 'Error al registrar venta');
+                }
+            } catch (error) {
+                mostrarError('Error al registrar venta: ' + error.message);
+            }
+        }
+
+        function eliminarVenta(id, producto) {
+            elementoAEliminar = id;
+            tipoEliminacion = 'venta';
+            document.getElementById('confirmMessage').textContent = 
+                `¿Estás seguro de que deseas eliminar la venta de "${producto}"? Esta acción no se puede deshacer.`;
+            document.getElementById('confirmModal').style.display = 'block';
+        }
+
+        // ==================== GESTIÓN DE REPORTES ====================
+        async function cargarReportes() {
+            const fecha = document.getElementById('fecha_reporte').value;
+            
+            try {
+                // Cargar estadísticas
+                const statsResponse = await fetch(`/api/reportes/estadisticas${fecha ? '?fecha=' + fecha : ''}`);
+                const estadisticas = await statsResponse.json();
+                mostrarEstadisticas(estadisticas);
+
+                // Cargar reporte diario
+                const reporteResponse = await fetch(`/api/reportes/diario${fecha ? '?fecha=' + fecha : ''}`);
+                const reporte = await reporteResponse.json();
+                mostrarReporteDiario(reporte);
+            } catch (error) {
+                mostrarError('Error al cargar reportes: ' + error.message);
+            }
+        }
+
+        function mostrarEstadisticas(stats) {
+            const container = document.getElementById('estadisticasContainer');
+            
+            if (!stats.total_ventas || stats.total_ventas === '0') {
+                container.innerHTML = '<div class="no-data">No hay ventas para mostrar estadísticas</div>';
+                return;
+            }
+
+            const html = `
+                <h3>Estadísticas del Día</h3>
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-value">${stats.total_ventas || 0}</div>
+                        <div class="stat-label">Total Ventas</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value">$${formatearPrecio(stats.ingresos_totales || 0)}</div>
+                        <div class="stat-label">Ingresos Totales</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value">${stats.total_unidades || 0}</div>
+                        <div class="stat-label">Unidades Vendidas</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value">$${formatearPrecio(stats.venta_promedio || 0)}</div>
+                        <div class="stat-label">Venta Promedio</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value">${stats.productos_diferentes || 0}</div>
+                        <div class="stat-label">Productos Diferentes</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value">$${formatearPrecio(stats.venta_maxima || 0)}</div>
+                        <div class="stat-label">Venta Máxima</div>
+                    </div>
+                </div>
+            `;
+            
+            container.innerHTML = html;
+        }
+
+        function mostrarReporteDiario(reporte) {
+            const container = document.getElementById('reporteContainer');
+            
+            if (reporte.length === 0) {
+                container.innerHTML = '<div class="no-data">No hay ventas para el reporte</div>';
+                return;
+            }
+
+            let html = `
+                <h3>Reporte Detallado por Producto</h3>
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Producto</th>
+                            <th>Precio Actual</th>
+                            <th>Unidades Vendidas</th>
+                            <th>Total Ventas</th>
+                            <th>Precio Promedio</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+            `;
+
+            reporte.forEach(item => {
+                html += `
+                    <tr>
+                        <td><strong>${item.producto}</strong></td>
+                        <td>$${formatearPrecio(item.precio_actual)}</td>
+                        <td>${item.cantidad_vendida}</td>
+                        <td><strong>$${formatearPrecio(item.total_ventas)}</strong></td>
+                        <td>$${formatearPrecio(item.precio_promedio)}</td>
+                    </tr>
+                `;
+            });
+
+            html += '</tbody></table>';
+            container.innerHTML = html;
+        }
+
+        // ==================== MODAL DE CONFIRMACIÓN ====================
+        async function confirmarEliminacion() {
+            try {
+                let response;
+                
+                if (tipoEliminacion === 'producto') {
+                    response = await fetch(`/api/productos/${elementoAEliminar}`, {
+                        method: 'DELETE'
+                    });
+                } else if (tipoEliminacion === 'venta') {
+                    response = await fetch(`/api/ventas/${elementoAEliminar}`, {
+                        method: 'DELETE'
+                    });
+                }
+
+                const result = await response.json();
+
+                if (response.ok) {
+                    mostrarExito(result.message || 'Elemento eliminado correctamente');
+                    
+                    if (tipoEliminacion === 'producto') {
+                        cargarProductos();
+                        cancelarEdicion(); // Por si estaba editando el producto eliminado
+                    } else if (tipoEliminacion === 'venta') {
+                        cargarVentasHoy();
+                    }
+                } else {
+                    mostrarError(result.error || 'Error al eliminar elemento');
+                }
+            } catch (error) {
+                mostrarError('Error al eliminar: ' + error.message);
+            }
+            
+            cerrarModal();
+        }
+
+        function cerrarModal() {
+            document.getElementById('confirmModal').style.display = 'none';
+            elementoAEliminar = null;
+            tipoEliminacion = null;
+        }
+
+        // ==================== FUNCIONES AUXILIARES ====================
+        function formatearPrecio(precio) {
+            return parseFloat(precio).toLocaleString('es-CO', {
+                minimumFractionDigits: 0,
+                maximumFractionDigits: 2
+            });
+        }
+
+        function formatearFecha(fecha) {
+            return new Date(fecha).toLocaleString('es-CO', {
+                year: 'numeric',
+                month: '2-digit',
+                day: '2-digit',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+        }
+
+        function formatearHora(hora) {
+            return hora.substring(0, 5); // HH:MM
+        }
+
+        function mostrarExito(mensaje) {
+            mostrarAlerta(mensaje, 'success');
+        }
+
+        function mostrarError(mensaje) {
+            mostrarAlerta(mensaje, 'error');
+        }
+
+        function mostrarAlerta(mensaje, tipo) {
+            // Remover alertas existentes
+            const alertasExistentes = document.querySelectorAll('.alert');
+            alertasExistentes.forEach(alerta => alerta.remove());
+
+            const alerta = document.createElement('div');
+            alerta.className = `alert alert-${tipo}`;
+            alerta.textContent = mensaje;
+
+            // Insertar al principio del contenido de la pestaña activa
+            const tabActiva = document.querySelector('.tab-pane.active');
+            tabActiva.insertBefore(alerta, tabActiva.firstChild);
+
+            // Remover automáticamente después de 5 segundos
+            setTimeout(() => {
+                if (alerta.parentNode) {
+                    alerta.remove();
+                }
+            }, 5000);
+        }
+
+        // Cerrar modal al hacer clic fuera de él
+        window.onclick = function(event) {
+            const modal = document.getElementById('confirmModal');
+            if (event.target === modal) {
+                cerrarModal();
+            }
+        }
+    </script>
+</body>
+</html>
