@@ -292,11 +292,14 @@ app.get('/api/reportes/diario', async (req, res) => {
     const { fecha } = req.query;
     
     try {
+        console.log('🔍 Consultando reporte diario para fecha:', fecha || 'HOY');
+        
         const result = await pool.query(`
             SELECT 
                 p.nombre as producto,
                 p.precio as precio_actual,
-                COUNT(v.id) as cantidad_vendida,
+                SUM(v.cantidad) as cantidad_vendida,
+                COUNT(v.id) as numero_transacciones,
                 SUM(v.total) as total_ventas,
                 AVG(v.precio_unitario) as precio_promedio
             FROM ventas v
@@ -305,6 +308,8 @@ app.get('/api/reportes/diario', async (req, res) => {
             GROUP BY p.id, p.nombre, p.precio
             ORDER BY total_ventas DESC
         `, fecha ? [fecha] : []);
+        
+        console.log('📊 Resultado del reporte:', result.rows);
         
         res.json(result.rows);
     } catch (error) {
