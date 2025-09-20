@@ -286,22 +286,225 @@
         }
 
         @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+            
+            .container {
+                padding: 0;
+            }
+            
+            .header {
+                padding: 20px 15px;
+                margin-bottom: 20px;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .header p {
+                font-size: 1rem;
+            }
+            
+            .back-btn {
+                top: 10px;
+                left: 10px;
+                padding: 10px 15px;
+                font-size: 0.9rem;
+            }
+            
             .charts-grid {
                 grid-template-columns: 1fr;
                 gap: 20px;
-            }
-            
-            .filters {
-                flex-direction: column;
-                align-items: stretch;
             }
             
             .chart-wrapper {
                 height: 250px;
             }
             
+            .chart-card {
+                padding: 20px;
+            }
+            
+            .chart-title {
+                font-size: 1.1rem;
+                margin-bottom: 15px;
+            }
+            
+            .filters {
+                padding: 15px;
+                flex-direction: column;
+                align-items: stretch;
+                gap: 15px;
+            }
+            
+            .filter-group {
+                width: 100%;
+            }
+            
+            .filter-input {
+                width: 100%;
+                padding: 10px;
+            }
+            
+            .refresh-btn {
+                width: 100%;
+                padding: 12px;
+                margin-top: 10px;
+            }
+            
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 15px;
+            }
+            
+            .stat-card {
+                padding: 20px 15px;
+            }
+            
+            .stat-value {
+                font-size: 1.8rem;
+            }
+            
+            .stat-label {
+                font-size: 0.9rem;
+            }
+            
+            .predictions {
+                padding: 20px;
+            }
+            
+            .predictions h3 {
+                font-size: 1.3rem;
+            }
+            
+            .predictions-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 15px;
+            }
+            
+            .prediction-card {
+                padding: 15px;
+            }
+            
+            .prediction-value {
+                font-size: 1.5rem;
+            }
+            
+            .prediction-label {
+                font-size: 0.8rem;
+            }
+            
+            .top-products {
+                padding: 20px;
+            }
+            
+            .top-products h3 {
+                font-size: 1.3rem;
+            }
+            
+            .product-item {
+                padding: 12px;
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 8px;
+            }
+            
+            .product-name {
+                font-size: 0.95rem;
+            }
+            
+            .product-stats {
+                text-align: left;
+                font-size: 0.9rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            body {
+                padding: 5px;
+            }
+            
+            .header {
+                padding: 15px 10px;
+            }
+            
             .header h1 {
-                font-size: 2rem;
+                font-size: 1.8rem;
+            }
+            
+            .back-btn {
+                padding: 8px 12px;
+                font-size: 0.8rem;
+            }
+            
+            .stats-grid {
+                grid-template-columns: 1fr;
+                gap: 10px;
+            }
+            
+            .stat-card {
+                padding: 15px 10px;
+            }
+            
+            .stat-value {
+                font-size: 1.6rem;
+            }
+            
+            .chart-wrapper {
+                height: 200px;
+            }
+            
+            .chart-card {
+                padding: 15px;
+            }
+            
+            .chart-title {
+                font-size: 1rem;
+            }
+            
+            .predictions {
+                padding: 15px;
+            }
+            
+            .predictions-grid {
+                grid-template-columns: 1fr;
+                gap: 10px;
+            }
+            
+            .prediction-card {
+                padding: 12px;
+            }
+            
+            .prediction-value {
+                font-size: 1.3rem;
+            }
+            
+            .top-products {
+                padding: 15px;
+            }
+            
+            .product-item {
+                padding: 10px;
+            }
+            
+            .product-name {
+                font-size: 0.9rem;
+            }
+            
+            .product-stats {
+                font-size: 0.8rem;
+            }
+            
+            .filter-input {
+                padding: 8px 10px;
+                font-size: 0.9rem;
+            }
+            
+            .refresh-btn {
+                padding: 10px;
+                font-size: 0.9rem;
             }
         }
     </style>
@@ -542,21 +745,27 @@
         function mostrarPredicciones(data) {
             const container = document.getElementById('prediccionesGrid');
             
+            // Verificar que data existe y tiene las propiedades necesarias
+            if (!data || !data.prediccionesSemanales || !data.prediccionesMensuales) {
+                container.innerHTML = '<div class="loading" style="color: #f44336;">Error: No se pudieron cargar las predicciones</div>';
+                return;
+            }
+            
             const html = `
                 <div class="prediction-card">
-                    <div class="prediction-value">$${formatearPrecio(data.prediccionesSemanales.ingresosSemana)}</div>
+                    <div class="prediction-value">${formatearPrecio(data.prediccionesSemanales.ingresosSemana || 0)}</div>
                     <div class="prediction-label">Ingresos próximos 7 días</div>
                 </div>
                 <div class="prediction-card">
-                    <div class="prediction-value">${data.prediccionesSemanales.unidadesSemana}</div>
+                    <div class="prediction-value">${data.prediccionesSemanales.unidadesSemana || 0}</div>
                     <div class="prediction-label">Unidades próximos 7 días</div>
                 </div>
                 <div class="prediction-card">
-                    <div class="prediction-value">$${formatearPrecio(data.prediccionesMensuales.ingresosMes)}</div>
+                    <div class="prediction-value">${formatearPrecio(data.prediccionesMensuales.ingresosMes || 0)}</div>
                     <div class="prediction-label">Ingresos próximos 30 días</div>
                 </div>
                 <div class="prediction-card">
-                    <div class="prediction-value">${data.prediccionesMensuales.unidadesMes}</div>
+                    <div class="prediction-value">${data.prediccionesMensuales.unidadesMes || 0}</div>
                     <div class="prediction-label">Unidades próximos 30 días</div>
                 </div>
             `;
@@ -576,10 +785,10 @@
             productos.slice(0, 5).forEach((producto, index) => {
                 html += `
                     <div class="product-item">
-                        <span class="product-name">${index + 1}. ${producto.nombre}</span>
+                        <span class="product-name">${index + 1}. ${producto.nombre || 'Sin nombre'}</span>
                         <div class="product-stats">
-                            <div><strong>$${formatearPrecio(producto.total_ingresos)}</strong></div>
-                            <div>${producto.total_cantidad} unidades</div>
+                            <div><strong>${formatearPrecio(producto.total_ingresos || 0)}</strong></div>
+                            <div>${producto.total_cantidad || 0} unidades</div>
                         </div>
                     </div>
                 `;

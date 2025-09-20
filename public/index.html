@@ -322,12 +322,25 @@
                 padding: 10px;
             }
             
+            .header {
+                padding: 20px 15px;
+            }
+            
             .header h1 {
                 font-size: 2rem;
             }
             
+            .header p {
+                font-size: 1rem;
+            }
+            
             .tabs {
                 flex-direction: column;
+            }
+            
+            .tab-button {
+                padding: 12px 15px;
+                font-size: 0.9rem;
             }
             
             .tab-content {
@@ -336,11 +349,97 @@
             
             .stats-grid {
                 grid-template-columns: 1fr;
+                gap: 15px;
+            }
+            
+            .stat-card {
+                padding: 20px;
+            }
+            
+            .stat-value {
+                font-size: 2rem;
             }
             
             .modal-content {
                 margin: 10% auto;
                 width: 95%;
+                padding: 20px;
+            }
+            
+            .modal-buttons {
+                flex-direction: column;
+                gap: 10px;
+            }
+            
+            .btn {
+                width: 100%;
+                justify-content: center;
+            }
+            
+            .table {
+                font-size: 0.9rem;
+            }
+            
+            .table th,
+            .table td {
+                padding: 10px 8px;
+            }
+            
+            /* Hacer tabla scrolleable en móvil */
+            .table-container {
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+            }
+            
+            .form-group {
+                margin-bottom: 15px;
+            }
+            
+            .form-control {
+                padding: 10px 12px;
+            }
+            
+            .btn-sm {
+                padding: 6px 12px;
+                font-size: 0.8rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .header {
+                padding: 15px 10px;
+            }
+            
+            .header h1 {
+                font-size: 1.8rem;
+            }
+            
+            .tab-content {
+                padding: 10px;
+            }
+            
+            .stat-card {
+                padding: 15px;
+            }
+            
+            .stat-value {
+                font-size: 1.8rem;
+            }
+            
+            .table th,
+            .table td {
+                padding: 8px 6px;
+                font-size: 0.8rem;
+            }
+            
+            .btn {
+                padding: 10px 16px;
+                font-size: 0.9rem;
+            }
+            
+            .modal-content {
+                margin: 5% auto;
+                padding: 15px;
             }
         }
     </style>

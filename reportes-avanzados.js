@@ -307,20 +307,24 @@ async function getPredicciones(req, res) {
             ORDER BY promedio_ingresos_diarios DESC NULLS LAST
         `);
 
-        const promedios = promediosDiarios.rows[0];
+        const promedios = promediosDiarios.rows[0] || {
+            promedio_ingresos_diarios: 0,
+            promedio_unidades_diarias: 0,
+            promedio_transacciones_diarias: 0
+        };
         
         // Calcular predicciones para próximos 7 días
         const prediccionesSemanales = {
-            ingresosSemana: (promedios.promedio_ingresos_diarios || 0) * 7,
-            unidadesSemana: Math.round((promedios.promedio_unidades_diarias || 0) * 7),
-            transaccionesSemana: Math.round((promedios.promedio_transacciones_diarias || 0) * 7)
+            ingresosSemana: (parseFloat(promedios.promedio_ingresos_diarios) || 0) * 7,
+            unidadesSemana: Math.round((parseFloat(promedios.promedio_unidades_diarias) || 0) * 7),
+            transaccionesSemana: Math.round((parseFloat(promedios.promedio_transacciones_diarias) || 0) * 7)
         };
 
         // Predicciones mensuales
         const prediccionesMensuales = {
-            ingresosMes: (promedios.promedio_ingresos_diarios || 0) * 30,
-            unidadesMes: Math.round((promedios.promedio_unidades_diarias || 0) * 30),
-            transaccionesMes: Math.round((promedios.promedio_transacciones_diarias || 0) * 30)
+            ingresosMes: (parseFloat(promedios.promedio_ingresos_diarios) || 0) * 30,
+            unidadesMes: Math.round((parseFloat(promedios.promedio_unidades_diarias) || 0) * 30),
+            transaccionesMes: Math.round((parseFloat(promedios.promedio_transacciones_diarias) || 0) * 30)
         };
 
         const response = {
