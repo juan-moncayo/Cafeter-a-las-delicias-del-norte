@@ -21,6 +21,71 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.static('public'));
 
+// ==================== FUNCIÓN PARA CREAR TABLAS ====================
+async function inicializarBaseDatos() {
+    try {
+        console.log('🔧 Verificando estructura de base de datos...');
+        
+        // Crear tabla productos si no existe
+        await pool.query(`
+            CREATE TABLE IF NOT EXISTS productos (
+                id SERIAL PRIMARY KEY,
+                nombre VARCHAR(100) NOT NULL UNIQUE,
+                precio DECIMAL(10,2) NOT NULL CHECK (precio >= 0),
+                activo BOOLEAN DEFAULT true,
+                fecha_creacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                fecha_actualizacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+        `);
+
+        // Crear tabla ventas si no existe
+        await pool.query(`
+            CREATE TABLE IF NOT EXISTS ventas (
+                id SERIAL PRIMARY KEY,
+                producto_id INTEGER NOT NULL REFERENCES productos(id) ON DELETE RESTRICT,
+                cantidad INTEGER NOT NULL DEFAULT 1 CHECK (cantidad > 0),
+                precio_unitario DECIMAL(10,2) NOT NULL CHECK (precio_unitario >= 0),
+                total DECIMAL(10,2) NOT NULL CHECK (total >= 0),
+                fecha_venta DATE NOT NULL DEFAULT CURRENT_DATE,
+                hora_venta TIME NOT NULL DEFAULT CURRENT_TIME,
+                fecha_creacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+        `);
+
+        // Crear índices si no existen
+        await pool.query(`
+            CREATE INDEX IF NOT EXISTS idx_ventas_fecha ON ventas(fecha_venta)
+        `);
+        await pool.query(`
+            CREATE INDEX IF NOT EXISTS idx_ventas_producto ON ventas(producto_id)
+        `);
+        await pool.query(`
+            CREATE INDEX IF NOT EXISTS idx_productos_activo ON productos(activo)
+        `);
+
+        // Verificar si hay productos de ejemplo, si no, crearlos
+        const productosExistentes = await pool.query('SELECT COUNT(*) FROM productos');
+        if (parseInt(productosExistentes.rows[0].count) === 0) {
+            console.log('📦 Creando productos de ejemplo...');
+            await pool.query(`
+                INSERT INTO productos (nombre, precio) VALUES 
+                ('Merengón', 3500.00),
+                ('Yogurt Natural', 2800.00),
+                ('Agua Botella 500ml', 1500.00),
+                ('Gaseosa Coca Cola', 2200.00),
+                ('Chocolate Jet', 1800.00)
+            `);
+            console.log('✅ Productos de ejemplo creados');
+        }
+
+        console.log('✅ Base de datos inicializada correctamente');
+        return true;
+    } catch (error) {
+        console.error('❌ Error inicializando base de datos:', error);
+        return false;
+    }
+}
+
 // Ruta principal - servir el HTML
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'index.html'));
@@ -225,7 +290,6 @@ app.delete('/api/ventas/:id', async (req, res) => {
 // Reporte de ventas diarias por producto
 app.get('/api/reportes/diario', async (req, res) => {
     const { fecha } = req.query;
-    const fechaConsulta = fecha || 'CURRENT_DATE';
     
     try {
         const result = await pool.query(`
@@ -275,22 +339,33 @@ app.get('/api/reportes/estadisticas', async (req, res) => {
 });
 
 // ==================== INICIAR SERVIDOR ====================
-app.listen(PORT, () => {
-    console.log(`🚀 Servidor corriendo en http://localhost:${PORT}`);
-    console.log('📊 Sistema de Ventas Simple - Listo para usar!');
-    console.log('🔗 Conectando a la base de datos...');
-    
-    // Probar conexión a la base de datos
-    pool.query('SELECT NOW() as fecha_conexion', (err, res) => {
-        if (err) {
-            console.error('❌ Error conectando a la base de datos:', err.message);
-            console.log('💡 Verifica que la base de datos esté disponible');
-        } else {
-            console.log('✅ Conexión a la base de datos exitosa');
-            console.log(`📅 Conectado en: ${res.rows[0].fecha_conexion}`);
+async function iniciarServidor() {
+    try {
+        // Primero verificar conexión e inicializar base de datos
+        await pool.query('SELECT NOW() as fecha_conexion');
+        console.log('✅ Conexión a la base de datos exitosa');
+        
+        // Inicializar estructura de base de datos
+        const dbInicializada = await inicializarBaseDatos();
+        
+        if (!dbInicializada) {
+            console.error('❌ No se pudo inicializar la base de datos');
+            process.exit(1);
         }
-    });
-});
+
+        // Iniciar servidor
+        app.listen(PORT, () => {
+            console.log(`🚀 Servidor corriendo en puerto ${PORT}`);
+            console.log('📊 Sistema de Ventas Simple - Listo para usar!');
+            console.log('🌐 Accesible en Railway');
+        });
+
+    } catch (error) {
+        console.error('❌ Error al iniciar el servidor:', error.message);
+        console.log('💡 Verifica que la base de datos esté disponible');
+        process.exit(1);
+    }
+}
 
 // Manejo de errores no capturados
 process.on('uncaughtException', (err) => {
@@ -300,3 +375,6 @@ process.on('uncaughtException', (err) => {
 process.on('unhandledRejection', (err) => {
     console.error('❌ Promesa rechazada:', err);
 });
+
+// Iniciar el servidor
+iniciarServidor();
