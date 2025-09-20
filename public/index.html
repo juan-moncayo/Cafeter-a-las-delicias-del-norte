@@ -798,7 +798,7 @@
                         <tr>
                             <th>Producto</th>
                             <th>Precio Actual</th>
-                            <th>Unidades Vendidas</th>
+                            <th>Cantidad Vendida</th>
                             <th>Total Ventas</th>
                             <th>Precio Promedio</th>
                         </tr>
@@ -810,10 +810,10 @@
                 html += `
                     <tr>
                         <td><strong>${item.producto}</strong></td>
-                        <td>$${formatearPrecio(item.precio_actual)}</td>
+                        <td>${formatearPrecio(item.precio_actual)}</td>
                         <td>${item.cantidad_vendida}</td>
-                        <td><strong>$${formatearPrecio(item.total_ventas)}</strong></td>
-                        <td>$${formatearPrecio(item.precio_promedio)}</td>
+                        <td><strong>${formatearPrecio(item.total_ventas)}</strong></td>
+                        <td>${formatearPrecio(item.precio_promedio)}</td>
                     </tr>
                 `;
             });

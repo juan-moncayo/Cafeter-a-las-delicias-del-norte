@@ -288,8 +288,8 @@ async function getPredicciones(req, res) {
             SELECT 
                 p.nombre,
                 p.precio,
-                AVG(ventas_diarias.unidades_dia) as promedio_unidades_diarias,
-                AVG(ventas_diarias.ingresos_dia) as promedio_ingresos_diarios,
+                COALESCE(AVG(ventas_diarias.unidades_dia), 0) as promedio_unidades_diarias,
+                COALESCE(AVG(ventas_diarias.ingresos_dia), 0) as promedio_ingresos_diarios,
                 COUNT(ventas_diarias.fecha_venta) as dias_con_ventas
             FROM productos p
             LEFT JOIN (
@@ -359,24 +359,16 @@ async function getTendencias(req, res) {
 
         // Crecimiento por producto en los últimos 3 meses
         const crecimientoProductos = await pool.query(`
-            WITH ventas_por_mes AS (
-                SELECT 
-                    p.nombre,
-                    DATE_TRUNC('month', v.fecha_venta) as mes,
-                    SUM(v.cantidad) as unidades,
-                    SUM(v.total) as ingresos
-                FROM ventas v
-                JOIN productos p ON v.producto_id = p.id
-                WHERE v.fecha_venta >= CURRENT_DATE - INTERVAL '3 months'
-                GROUP BY p.id, p.nombre, DATE_TRUNC('month', v.fecha_venta)
-            )
             SELECT 
-                nombre,
-                SUM(unidades) as total_unidades,
-                SUM(ingresos) as total_ingresos,
-                COUNT(mes) as meses_activos
-            FROM ventas_por_mes
-            GROUP BY nombre
+                p.nombre,
+                COALESCE(SUM(v.cantidad), 0) as total_unidades,
+                COALESCE(SUM(v.total), 0) as total_ingresos,
+                COUNT(DISTINCT DATE_TRUNC('month', v.fecha_venta)) as meses_activos
+            FROM productos p
+            LEFT JOIN ventas v ON p.id = v.producto_id 
+                AND v.fecha_venta >= CURRENT_DATE - INTERVAL '3 months'
+            WHERE p.activo = true
+            GROUP BY p.id, p.nombre
             ORDER BY total_ingresos DESC
         `);
 
