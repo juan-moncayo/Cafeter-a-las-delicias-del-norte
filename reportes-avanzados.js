@@ -11,25 +11,54 @@ const pool = new Pool({
 // ==================== DASHBOARD PRINCIPAL ====================
 async function getDashboardData(req, res) {
     try {
-        // Estadísticas del día actual
+        // Estadísticas del día actual (incluye gastos)
         const hoyStats = await pool.query(`
             SELECT 
-                COUNT(*) as transacciones_hoy,
-                SUM(cantidad) as unidades_hoy,
-                SUM(total) as ingresos_hoy,
-                COUNT(DISTINCT producto_id) as productos_vendidos_hoy
-            FROM ventas 
-            WHERE fecha_venta = CURRENT_DATE
+                COALESCE(v.transacciones_hoy, 0) as transacciones_hoy,
+                COALESCE(v.unidades_hoy, 0) as unidades_hoy,
+                COALESCE(v.ingresos_hoy, 0) as ingresos_hoy,
+                COALESCE(v.productos_vendidos_hoy, 0) as productos_vendidos_hoy,
+                COALESCE(g.gastos_hoy, 0) as gastos_hoy,
+                COALESCE(v.ingresos_hoy, 0) - COALESCE(g.gastos_hoy, 0) as ganancia_neta_hoy
+            FROM (
+                SELECT 
+                    COUNT(*) as transacciones_hoy,
+                    SUM(cantidad) as unidades_hoy,
+                    SUM(total) as ingresos_hoy,
+                    COUNT(DISTINCT producto_id) as productos_vendidos_hoy
+                FROM ventas 
+                WHERE fecha_venta = CURRENT_DATE
+            ) v
+            CROSS JOIN (
+                SELECT 
+                    COALESCE(SUM(monto), 0) as gastos_hoy
+                FROM gastos 
+                WHERE fecha_gasto = CURRENT_DATE AND activo = true
+            ) g
         `);
 
-        // Estadísticas de ayer para comparación
+        // Estadísticas de ayer para comparación (incluye gastos)
         const ayerStats = await pool.query(`
             SELECT 
-                COUNT(*) as transacciones_ayer,
-                SUM(cantidad) as unidades_ayer,
-                SUM(total) as ingresos_ayer
-            FROM ventas 
-            WHERE fecha_venta = CURRENT_DATE - INTERVAL '1 day'
+                COALESCE(v.transacciones_ayer, 0) as transacciones_ayer,
+                COALESCE(v.unidades_ayer, 0) as unidades_ayer,
+                COALESCE(v.ingresos_ayer, 0) as ingresos_ayer,
+                COALESCE(g.gastos_ayer, 0) as gastos_ayer,
+                COALESCE(v.ingresos_ayer, 0) - COALESCE(g.gastos_ayer, 0) as ganancia_neta_ayer
+            FROM (
+                SELECT 
+                    COUNT(*) as transacciones_ayer,
+                    SUM(cantidad) as unidades_ayer,
+                    SUM(total) as ingresos_ayer
+                FROM ventas 
+                WHERE fecha_venta = CURRENT_DATE - INTERVAL '1 day'
+            ) v
+            CROSS JOIN (
+                SELECT 
+                    COALESCE(SUM(monto), 0) as gastos_ayer
+                FROM gastos 
+                WHERE fecha_gasto = CURRENT_DATE - INTERVAL '1 day' AND activo = true
+            ) g
         `);
 
         // Top productos del mes
@@ -267,7 +296,7 @@ async function getPredicciones(req, res) {
         const tendenciaDiaSemana = await pool.query(`
             SELECT 
                 EXTRACT(DOW FROM fecha_venta) as dia_semana,
-                TO_CHAR(fecha_venta, 'Day') as nombre_dia,
+                TO_CHAR(DATE '2023-01-01' + EXTRACT(DOW FROM fecha_venta) * INTERVAL '1 day', 'Day') as nombre_dia,
                 AVG(total_dia) as promedio_ingresos,
                 AVG(unidades_dia) as promedio_unidades
             FROM (

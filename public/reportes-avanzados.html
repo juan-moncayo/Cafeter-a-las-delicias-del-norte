@@ -55,6 +55,7 @@
             font-weight: 500;
             backdrop-filter: blur(10px);
             box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            z-index: 1000;
         }
 
         .back-btn:hover {
@@ -515,7 +516,7 @@
     <div class="container">
         <div class="header">
             <h1>📊 Analytics Avanzados</h1>
-            <p>Análisis completo de ventas, tendencias y predicciones</p>
+            <p>Análisis completo de ventas, gastos, tendencias y predicciones</p>
         </div>
 
         <div class="filters">
@@ -634,6 +635,20 @@
                     </div>
                 </div>
                 <div class="stat-card">
+                    <div class="stat-value">$${formatearPrecio(hoy.gastos_hoy || 0)}</div>
+                    <div class="stat-label">Gastos Hoy</div>
+                    <div class="stat-change ${(hoy.gastos_hoy || 0) >= (ayer.gastos_ayer || 0) ? 'negative' : 'positive'}">
+                        ${calcularVariacion(hoy.gastos_hoy, ayer.gastos_ayer)} vs ayer
+                    </div>
+                </div>
+                <div class="stat-card" style="background: linear-gradient(135deg, #56ab2f 0%, #a8e6cf 100%);">
+                    <div class="stat-value">$${formatearPrecio(hoy.ganancia_neta_hoy || 0)}</div>
+                    <div class="stat-label">Ganancia Neta Hoy</div>
+                    <div class="stat-change ${(hoy.ganancia_neta_hoy || 0) >= (ayer.ganancia_neta_ayer || 0) ? 'positive' : 'negative'}">
+                        ${calcularVariacion(hoy.ganancia_neta_hoy, ayer.ganancia_neta_ayer)} vs ayer
+                    </div>
+                </div>
+                <div class="stat-card">
                     <div class="stat-value">${hoy.unidades_hoy || 0}</div>
                     <div class="stat-label">Unidades Hoy</div>
                     <div class="stat-change ${(hoy.unidades_hoy || 0) >= (ayer.unidades_ayer || 0) ? 'positive' : 'negative'}">
@@ -650,6 +665,7 @@
             container.innerHTML = html;
         }
 
+        // ==================== GRÁFICOS ====================
         function crearGraficos(dashboard, semanal) {
             // Gráfico de tendencia (últimos 30 días)
             const ctxTendencia = document.getElementById('tendenciaChart').getContext('2d');
@@ -753,7 +769,7 @@
             
             const html = `
                 <div class="prediction-card">
-                    <div class="prediction-value">${formatearPrecio(data.prediccionesSemanales.ingresosSemana || 0)}</div>
+                    <div class="prediction-value">$${formatearPrecio(data.prediccionesSemanales.ingresosSemana || 0)}</div>
                     <div class="prediction-label">Ingresos próximos 7 días</div>
                 </div>
                 <div class="prediction-card">
@@ -761,7 +777,7 @@
                     <div class="prediction-label">Unidades próximos 7 días</div>
                 </div>
                 <div class="prediction-card">
-                    <div class="prediction-value">${formatearPrecio(data.prediccionesMensuales.ingresosMes || 0)}</div>
+                    <div class="prediction-value">$${formatearPrecio(data.prediccionesMensuales.ingresosMes || 0)}</div>
                     <div class="prediction-label">Ingresos próximos 30 días</div>
                 </div>
                 <div class="prediction-card">
@@ -787,7 +803,7 @@
                     <div class="product-item">
                         <span class="product-name">${index + 1}. ${producto.nombre || 'Sin nombre'}</span>
                         <div class="product-stats">
-                            <div><strong>${formatearPrecio(producto.total_ingresos || 0)}</strong></div>
+                            <div><strong>$${formatearPrecio(producto.total_ingresos || 0)}</strong></div>
                             <div>${producto.total_cantidad || 0} unidades</div>
                         </div>
                     </div>

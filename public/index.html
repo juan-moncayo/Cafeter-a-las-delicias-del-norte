@@ -348,7 +348,7 @@
             }
             
             .stats-grid {
-                grid-template-columns: 1fr;
+                grid-template-columns: repeat(2, 1fr);
                 gap: 15px;
             }
             
@@ -426,6 +426,11 @@
                 font-size: 1.8rem;
             }
             
+            .stats-grid {
+                grid-template-columns: 1fr;
+                gap: 10px;
+            }
+            
             .table th,
             .table td {
                 padding: 8px 6px;
@@ -441,6 +446,16 @@
                 margin: 5% auto;
                 padding: 15px;
             }
+            
+            .form-control {
+                padding: 8px 10px;
+                font-size: 0.9rem;
+            }
+            
+            .btn-sm {
+                padding: 6px 10px;
+                font-size: 0.75rem;
+            }
         }
     </style>
 </head>
@@ -454,6 +469,7 @@
         <div class="tabs">
             <button class="tab-button active" onclick="showTab('ventas')">📊 Ventas del Día</button>
             <button class="tab-button" onclick="showTab('productos')">🏷️ Productos</button>
+            <button class="tab-button" onclick="showTab('gastos')">💸 Gastos</button>
             <button class="tab-button" onclick="showTab('reportes')">📈 Reportes</button>
         </div>
 
@@ -499,6 +515,30 @@
                 <div id="listaProductos"></div>
             </div>
 
+            <!-- Tab Gastos -->
+            <div id="gastos" class="tab-pane">
+                <h2>Gestión de Gastos</h2>
+                <form id="gastoForm">
+                    <div class="form-group">
+                        <label for="concepto_gasto">Concepto del Gasto:</label>
+                        <input type="text" id="concepto_gasto" class="form-control" required placeholder="Ej: Compra ingredientes, Transporte, etc.">
+                    </div>
+                    <div class="form-group">
+                        <label for="monto_gasto">Monto:</label>
+                        <input type="number" id="monto_gasto" class="form-control" step="0.01" min="0" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="descripcion_gasto">Descripción (opcional):</label>
+                        <textarea id="descripcion_gasto" class="form-control" rows="3" placeholder="Detalles adicionales del gasto..."></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary" id="btnGasto">➕ Agregar Gasto</button>
+                    <button type="button" class="btn btn-warning" id="btnCancelarGasto" onclick="cancelarEdicionGasto()" style="display: none;">❌ Cancelar</button>
+                </form>
+
+                <h3 style="margin-top: 30px;">Gastos de Hoy</h3>
+                <div id="listaGastos"></div>
+            </div>
+
             <!-- Tab Reportes -->
             <div id="reportes" class="tab-pane">
                 <h2>Estadísticas y Reportes</h2>
@@ -528,6 +568,7 @@
     <script>
         // Variables globales
         let editandoProducto = null;
+        let editandoGasto = null;
         let elementoAEliminar = null;
         let tipoEliminacion = null;
 
@@ -535,6 +576,7 @@
         document.addEventListener('DOMContentLoaded', function() {
             cargarProductos();
             cargarVentasHoy();
+            cargarGastosHoy();
             
             // Establecer fecha actual en el reporte
             const fechaHoy = new Date().toISOString().split('T')[0];
@@ -544,6 +586,7 @@
             // Event listeners para los formularios
             document.getElementById('productoForm').addEventListener('submit', manejarProducto);
             document.getElementById('ventaForm').addEventListener('submit', registrarVenta);
+            document.getElementById('gastoForm').addEventListener('submit', manejarGasto);
         });
 
         // ==================== GESTIÓN DE TABS ====================
@@ -566,6 +609,8 @@
                 cargarVentasHoy();
             } else if (tabName === 'productos') {
                 cargarProductos();
+            } else if (tabName === 'gastos') {
+                cargarGastosHoy();
             } else if (tabName === 'reportes') {
                 cargarReportes();
             }
@@ -817,6 +862,145 @@
             document.getElementById('confirmModal').style.display = 'block';
         }
 
+        // ==================== GESTIÓN DE GASTOS ====================
+        async function cargarGastosHoy() {
+            try {
+                const response = await fetch('/api/gastos');
+                const gastos = await response.json();
+                mostrarListaGastos(gastos);
+            } catch (error) {
+                mostrarError('Error al cargar gastos: ' + error.message);
+            }
+        }
+
+        function mostrarListaGastos(gastos) {
+            const container = document.getElementById('listaGastos');
+            
+            if (gastos.length === 0) {
+                container.innerHTML = '<div class="no-data">No hay gastos registrados hoy</div>';
+                return;
+            }
+
+            let totalGastos = gastos.reduce((sum, gasto) => sum + parseFloat(gasto.monto), 0);
+            
+            let html = `
+                <div class="alert alert-info">
+                    <strong>Total de gastos hoy: ${formatearPrecio(totalGastos)}</strong> 
+                    (${gastos.length} gasto${gastos.length !== 1 ? 's' : ''})
+                </div>
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Concepto</th>
+                            <th>Monto</th>
+                            <th>Descripción</th>
+                            <th>Hora</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+            `;
+
+            gastos.forEach(gasto => {
+                html += `
+                    <tr>
+                        <td><strong>${gasto.concepto}</strong></td>
+                        <td><strong>${formatearPrecio(gasto.monto)}</strong></td>
+                        <td>${gasto.descripcion || '-'}</td>
+                        <td>${formatearHora(gasto.hora_gasto)}</td>
+                        <td>
+                            <button class="btn btn-warning btn-sm" onclick="editarGasto(${gasto.id}, '${gasto.concepto}', ${gasto.monto}, '${gasto.descripcion || ''}')">
+                                ✏️ Editar
+                            </button>
+                            <button class="btn btn-danger btn-sm" onclick="eliminarGasto(${gasto.id}, '${gasto.concepto}')">
+                                🗑️ Eliminar
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            });
+
+            html += '</tbody></table>';
+            container.innerHTML = html;
+        }
+
+        async function manejarGasto(event) {
+            event.preventDefault();
+            
+            const concepto = document.getElementById('concepto_gasto').value.trim();
+            const monto = parseFloat(document.getElementById('monto_gasto').value);
+            const descripcion = document.getElementById('descripcion_gasto').value.trim();
+
+            if (!concepto || !monto) {
+                mostrarError('Por favor completa el concepto y monto');
+                return;
+            }
+
+            try {
+                let response;
+                
+                if (editandoGasto) {
+                    // Actualizar gasto existente
+                    response = await fetch(`/api/gastos/${editandoGasto}`, {
+                        method: 'PUT',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ concepto, monto, descripcion })
+                    });
+                } else {
+                    // Crear nuevo gasto
+                    response = await fetch('/api/gastos', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ concepto, monto, descripcion })
+                    });
+                }
+
+                const result = await response.json();
+
+                if (response.ok) {
+                    mostrarExito(editandoGasto ? 'Gasto actualizado correctamente' : 'Gasto registrado correctamente');
+                    limpiarFormularioGasto();
+                    cargarGastosHoy();
+                } else {
+                    mostrarError(result.error || 'Error al procesar gasto');
+                }
+            } catch (error) {
+                mostrarError('Error al procesar gasto: ' + error.message);
+            }
+        }
+
+        function editarGasto(id, concepto, monto, descripcion) {
+            editandoGasto = id;
+            document.getElementById('concepto_gasto').value = concepto;
+            document.getElementById('monto_gasto').value = monto;
+            document.getElementById('descripcion_gasto').value = descripcion;
+            document.getElementById('btnGasto').textContent = '💾 Actualizar Gasto';
+            document.getElementById('btnCancelarGasto').style.display = 'inline-block';
+        }
+
+        function cancelarEdicionGasto() {
+            limpiarFormularioGasto();
+        }
+
+        function limpiarFormularioGasto() {
+            editandoGasto = null;
+            document.getElementById('gastoForm').reset();
+            document.getElementById('btnGasto').textContent = '➕ Agregar Gasto';
+            document.getElementById('btnCancelarGasto').style.display = 'none';
+        }
+
+        function eliminarGasto(id, concepto) {
+            elementoAEliminar = id;
+            tipoEliminacion = 'gasto';
+            document.getElementById('confirmMessage').textContent = 
+                `¿Estás seguro de que deseas eliminar el gasto "${concepto}"? Esta acción no se puede deshacer.`;
+            document.getElementById('confirmModal').style.display = 'block';
+        }
+
         // ==================== GESTIÓN DE REPORTES ====================
         async function cargarReportes() {
             const fecha = document.getElementById('fecha_reporte').value;
@@ -852,15 +1036,23 @@
                         <div class="stat-label">Total Transacciones</div>
                     </div>
                     <div class="stat-card">
-                        <div class="stat-value">$${formatearPrecio(stats.ingresos_totales || 0)}</div>
+                        <div class="stat-value">${formatearPrecio(stats.ingresos_totales || 0)}</div>
                         <div class="stat-label">Ingresos Totales</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value">${formatearPrecio(stats.total_gastos || 0)}</div>
+                        <div class="stat-label">Total Gastos</div>
+                    </div>
+                    <div class="stat-card" style="background: linear-gradient(135deg, #56ab2f 0%, #a8e6cf 100%);">
+                        <div class="stat-value">${formatearPrecio(stats.ganancia_neta || 0)}</div>
+                        <div class="stat-label">Ganancia Neta</div>
                     </div>
                     <div class="stat-card">
                         <div class="stat-value">${stats.cantidad_total_vendida || 0}</div>
                         <div class="stat-label">Cantidad Vendida</div>
                     </div>
                     <div class="stat-card">
-                        <div class="stat-value">$${formatearPrecio(stats.venta_promedio || 0)}</div>
+                        <div class="stat-value">${formatearPrecio(stats.venta_promedio || 0)}</div>
                         <div class="stat-label">Venta Promedio</div>
                     </div>
                     <div class="stat-card">
@@ -868,7 +1060,7 @@
                         <div class="stat-label">Productos Diferentes</div>
                     </div>
                     <div class="stat-card">
-                        <div class="stat-value">$${formatearPrecio(stats.venta_maxima || 0)}</div>
+                        <div class="stat-value">${formatearPrecio(stats.venta_maxima || 0)}</div>
                         <div class="stat-label">Venta Máxima</div>
                     </div>
                 </div>
@@ -934,6 +1126,10 @@
                     response = await fetch(`/api/ventas/${elementoAEliminar}`, {
                         method: 'DELETE'
                     });
+                } else if (tipoEliminacion === 'gasto') {
+                    response = await fetch(`/api/gastos/${elementoAEliminar}`, {
+                        method: 'DELETE'
+                    });
                 }
 
                 const result = await response.json();
@@ -946,6 +1142,8 @@
                         cancelarEdicion(); // Por si estaba editando el producto eliminado
                     } else if (tipoEliminacion === 'venta') {
                         cargarVentasHoy();
+                    } else if (tipoEliminacion === 'gasto') {
+                        cargarGastosHoy();
                     }
                 } else {
                     mostrarError(result.error || 'Error al eliminar elemento');

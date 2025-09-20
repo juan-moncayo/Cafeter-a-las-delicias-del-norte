@@ -38,7 +38,19 @@ async function inicializarBaseDatos() {
             )
         `);
 
-        // Crear tabla ventas si no existe
+        // Crear tabla gastos si no existe
+        await pool.query(`
+            CREATE TABLE IF NOT EXISTS gastos (
+                id SERIAL PRIMARY KEY,
+                concepto VARCHAR(200) NOT NULL,
+                monto DECIMAL(10,2) NOT NULL CHECK (monto >= 0),
+                descripcion TEXT,
+                fecha_gasto DATE NOT NULL DEFAULT CURRENT_DATE,
+                hora_gasto TIME NOT NULL DEFAULT CURRENT_TIME,
+                activo BOOLEAN DEFAULT true,
+                fecha_creacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+        `);
         await pool.query(`
             CREATE TABLE IF NOT EXISTS ventas (
                 id SERIAL PRIMARY KEY,
@@ -61,6 +73,12 @@ async function inicializarBaseDatos() {
         `);
         await pool.query(`
             CREATE INDEX IF NOT EXISTS idx_productos_activo ON productos(activo)
+        `);
+        await pool.query(`
+            CREATE INDEX IF NOT EXISTS idx_gastos_fecha ON gastos(fecha_gasto)
+        `);
+        await pool.query(`
+            CREATE INDEX IF NOT EXISTS idx_gastos_activo ON gastos(activo)
         `);
 
         // Verificar si hay productos de ejemplo, si no, crearlos
@@ -318,12 +336,12 @@ app.get('/api/reportes/diario', async (req, res) => {
     }
 });
 
-// Estadísticas generales del día
+// Estadísticas generales del día (incluye gastos)
 app.get('/api/reportes/estadisticas', async (req, res) => {
     const { fecha } = req.query;
     
     try {
-        const result = await pool.query(`
+        const ventasResult = await pool.query(`
             SELECT 
                 COUNT(DISTINCT producto_id) as productos_diferentes,
                 COUNT(*) as total_transacciones,
@@ -335,11 +353,116 @@ app.get('/api/reportes/estadisticas', async (req, res) => {
             FROM ventas
             WHERE fecha_venta = ${fecha ? '$1' : 'CURRENT_DATE'}
         `, fecha ? [fecha] : []);
-        
-        res.json(result.rows[0]);
+
+        const gastosResult = await pool.query(`
+            SELECT 
+                COALESCE(SUM(monto), 0) as total_gastos,
+                COUNT(*) as total_gastos_registros
+            FROM gastos
+            WHERE fecha_gasto = ${fecha ? '$1' : 'CURRENT_DATE'} AND activo = true
+        `, fecha ? [fecha] : []);
+
+        const ventas = ventasResult.rows[0];
+        const gastos = gastosResult.rows[0];
+
+        const response = {
+            ...ventas,
+            total_gastos: parseFloat(gastos.total_gastos) || 0,
+            total_gastos_registros: parseInt(gastos.total_gastos_registros) || 0,
+            ganancia_neta: (parseFloat(ventas.ingresos_totales) || 0) - (parseFloat(gastos.total_gastos) || 0)
+        };
+
+        res.json(response);
     } catch (error) {
         console.error('Error al obtener estadísticas:', error);
         res.status(500).json({ error: 'Error al obtener estadísticas' });
+    }
+});
+
+// ==================== RUTAS PARA GASTOS ====================
+
+// Obtener gastos del día actual
+app.get('/api/gastos', async (req, res) => {
+    try {
+        const result = await pool.query(`
+            SELECT * FROM gastos 
+            WHERE fecha_gasto = CURRENT_DATE AND activo = true
+            ORDER BY fecha_creacion DESC
+        `);
+        res.json(result.rows);
+    } catch (error) {
+        console.error('Error al obtener gastos:', error);
+        res.status(500).json({ error: 'Error al obtener gastos' });
+    }
+});
+
+// Crear nuevo gasto
+app.post('/api/gastos', async (req, res) => {
+    const { concepto, monto, descripcion = '' } = req.body;
+    
+    if (!concepto || !monto) {
+        return res.status(400).json({ error: 'Concepto y monto son requeridos' });
+    }
+
+    try {
+        const result = await pool.query(`
+            INSERT INTO gastos (concepto, monto, descripcion) 
+            VALUES ($1, $2, $3) 
+            RETURNING *
+        `, [concepto, parseFloat(monto), descripcion]);
+        
+        res.status(201).json(result.rows[0]);
+    } catch (error) {
+        console.error('Error al crear gasto:', error);
+        res.status(500).json({ error: 'Error al crear gasto' });
+    }
+});
+
+// Actualizar gasto
+app.put('/api/gastos/:id', async (req, res) => {
+    const { id } = req.params;
+    const { concepto, monto, descripcion = '' } = req.body;
+    
+    if (!concepto || !monto) {
+        return res.status(400).json({ error: 'Concepto y monto son requeridos' });
+    }
+
+    try {
+        const result = await pool.query(`
+            UPDATE gastos SET concepto = $1, monto = $2, descripcion = $3 
+            WHERE id = $4 AND activo = true 
+            RETURNING *
+        `, [concepto, parseFloat(monto), descripcion, id]);
+        
+        if (result.rows.length === 0) {
+            return res.status(404).json({ error: 'Gasto no encontrado' });
+        }
+        
+        res.json(result.rows[0]);
+    } catch (error) {
+        console.error('Error al actualizar gasto:', error);
+        res.status(500).json({ error: 'Error al actualizar gasto' });
+    }
+});
+
+// Eliminar gasto (soft delete)
+app.delete('/api/gastos/:id', async (req, res) => {
+    const { id } = req.params;
+
+    try {
+        const result = await pool.query(
+            'UPDATE gastos SET activo = false WHERE id = $1 AND activo = true RETURNING *',
+            [id]
+        );
+        
+        if (result.rows.length === 0) {
+            return res.status(404).json({ error: 'Gasto no encontrado' });
+        }
+        
+        res.json({ message: 'Gasto eliminado', gasto: result.rows[0] });
+    } catch (error) {
+        console.error('Error al eliminar gasto:', error);
+        res.status(500).json({ error: 'Error al eliminar gasto' });
     }
 });
 

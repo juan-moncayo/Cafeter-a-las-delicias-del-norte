@@ -4,6 +4,7 @@
 -- =====================================================
 
 -- Eliminar tablas si existen (para reiniciar limpio)
+DROP TABLE IF EXISTS gastos CASCADE;
 DROP TABLE IF EXISTS ventas CASCADE;
 DROP TABLE IF EXISTS productos CASCADE;
 
@@ -28,6 +29,18 @@ CREATE TABLE productos (
     fecha_actualizacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
+-- Tabla de gastos
+CREATE TABLE gastos (
+    id SERIAL PRIMARY KEY,
+    concepto VARCHAR(200) NOT NULL,
+    monto DECIMAL(10,2) NOT NULL CHECK (monto >= 0),
+    descripcion TEXT,
+    fecha_gasto DATE NOT NULL DEFAULT CURRENT_DATE,
+    hora_gasto TIME NOT NULL DEFAULT CURRENT_TIME,
+    activo BOOLEAN DEFAULT true,
+    fecha_creacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
 -- Tabla de ventas
 CREATE TABLE ventas (
     id SERIAL PRIMARY KEY,
@@ -49,6 +62,8 @@ CREATE INDEX idx_ventas_producto ON ventas(producto_id);
 CREATE INDEX idx_ventas_fecha_producto ON ventas(fecha_venta, producto_id);
 CREATE INDEX idx_productos_activo ON productos(activo);
 CREATE INDEX idx_productos_nombre ON productos(nombre);
+CREATE INDEX idx_gastos_fecha ON gastos(fecha_gasto);
+CREATE INDEX idx_gastos_activo ON gastos(activo);
 
 -- =====================================================
 -- CREAR TRIGGERS Y FUNCIONES
@@ -56,12 +71,12 @@ CREATE INDEX idx_productos_nombre ON productos(nombre);
 
 -- Función para actualizar fecha de modificación
 CREATE OR REPLACE FUNCTION actualizar_fecha_modificacion()
-RETURNS TRIGGER AS $$
+RETURNS TRIGGER AS $
 BEGIN
     NEW.fecha_actualizacion = CURRENT_TIMESTAMP;
     RETURN NEW;
 END;
-$$ language 'plpgsql';
+$ language 'plpgsql';
 
 -- Trigger para actualizar fecha_actualizacion en productos
 CREATE TRIGGER trigger_actualizar_productos
@@ -71,13 +86,13 @@ CREATE TRIGGER trigger_actualizar_productos
 
 -- Trigger para validar que el total sea correcto
 CREATE OR REPLACE FUNCTION validar_total_venta()
-RETURNS TRIGGER AS $$
+RETURNS TRIGGER AS $
 BEGIN
     -- Calcular el total correcto
     NEW.total = NEW.cantidad * NEW.precio_unitario;
     RETURN NEW;
 END;
-$$ language 'plpgsql';
+$ language 'plpgsql';
 
 CREATE TRIGGER trigger_validar_total
     BEFORE INSERT OR UPDATE ON ventas
@@ -95,8 +110,7 @@ SELECT
     p.id as producto_id,
     p.nombre as producto,
     p.precio as precio_actual_producto,
-    COUNT(v.id) as cantidad_vendida,
-    SUM(v.cantidad) as unidades_vendidas,
+    SUM(v.cantidad) as cantidad_vendida,
     SUM(v.total) as total_ventas,
     AVG(v.precio_unitario) as precio_promedio,
     MIN(v.precio_unitario) as precio_minimo,
@@ -106,21 +120,46 @@ JOIN productos p ON v.producto_id = p.id
 GROUP BY v.fecha_venta, p.id, p.nombre, p.precio
 ORDER BY v.fecha_venta DESC, total_ventas DESC;
 
--- Vista para estadísticas generales diarias
+-- Vista para estadísticas generales diarias (incluye gastos)
 CREATE OR REPLACE VIEW estadisticas_diarias AS
 SELECT 
-    fecha_venta,
-    COUNT(*) as total_transacciones,
-    COUNT(DISTINCT producto_id) as productos_diferentes,
-    SUM(cantidad) as total_unidades,
-    SUM(total) as ingresos_totales,
-    AVG(total) as venta_promedio,
-    MIN(total) as venta_minima,
-    MAX(total) as venta_maxima,
-    STDDEV(total) as desviacion_estandar
-FROM ventas
-GROUP BY fecha_venta
-ORDER BY fecha_venta DESC;
+    fecha,
+    COALESCE(ingresos_ventas, 0) as ingresos_ventas,
+    COALESCE(total_gastos, 0) as total_gastos,
+    COALESCE(ingresos_ventas, 0) - COALESCE(total_gastos, 0) as ganancia_neta,
+    COALESCE(total_transacciones, 0) as total_transacciones,
+    COALESCE(productos_diferentes, 0) as productos_diferentes,
+    COALESCE(total_unidades, 0) as total_unidades,
+    COALESCE(venta_promedio, 0) as venta_promedio,
+    COALESCE(venta_minima, 0) as venta_minima,
+    COALESCE(venta_maxima, 0) as venta_maxima
+FROM (
+    SELECT DISTINCT fecha_venta as fecha FROM ventas
+    UNION 
+    SELECT DISTINCT fecha_gasto as fecha FROM gastos
+) fechas
+LEFT JOIN (
+    SELECT 
+        fecha_venta as fecha,
+        COUNT(*) as total_transacciones,
+        COUNT(DISTINCT producto_id) as productos_diferentes,
+        SUM(cantidad) as total_unidades,
+        SUM(total) as ingresos_ventas,
+        AVG(total) as venta_promedio,
+        MIN(total) as venta_minima,
+        MAX(total) as venta_maxima
+    FROM ventas
+    GROUP BY fecha_venta
+) ventas_stats ON fechas.fecha = ventas_stats.fecha
+LEFT JOIN (
+    SELECT 
+        fecha_gasto as fecha,
+        SUM(monto) as total_gastos
+    FROM gastos
+    WHERE activo = true
+    GROUP BY fecha_gasto
+) gastos_stats ON fechas.fecha = gastos_stats.fecha
+ORDER BY fecha DESC;
 
 -- =====================================================
 -- INSERTAR DATOS DE EJEMPLO
@@ -133,6 +172,12 @@ INSERT INTO productos (nombre, precio) VALUES
 ('Agua Botella 500ml', 1500.00),
 ('Gaseosa Coca Cola', 2200.00),
 ('Chocolate Jet', 1800.00);
+
+-- Insertar gastos de ejemplo
+INSERT INTO gastos (concepto, monto, descripcion) VALUES 
+('Compra ingredientes', 15000.00, 'Compra de leche y azúcar'),
+('Transporte', 5000.00, 'Gasolina para entregas'),
+('Servicios públicos', 8000.00, 'Luz del local');
 
 -- Insertar algunas ventas de ejemplo para hoy
 INSERT INTO ventas (producto_id, cantidad, precio_unitario) VALUES 
@@ -153,6 +198,11 @@ SELECT
 FROM productos
 UNION ALL
 SELECT 
+    'gastos' as tabla,
+    COUNT(*) as registros
+FROM gastos
+UNION ALL
+SELECT 
     'ventas' as tabla,
     COUNT(*) as registros
 FROM ventas;
@@ -166,24 +216,20 @@ SELECT
 FROM productos
 ORDER BY id;
 
--- Mostrar ventas de hoy
+-- Mostrar gastos creados
 SELECT 
-    v.id,
-    p.nombre as producto,
-    v.cantidad,
-    v.precio_unitario,
-    v.total,
-    v.hora_venta
-FROM ventas v
-JOIN productos p ON v.producto_id = p.id
-WHERE v.fecha_venta = CURRENT_DATE
-ORDER BY v.hora_venta DESC;
+    id,
+    concepto,
+    monto,
+    fecha_gasto
+FROM gastos
+ORDER BY id;
 
--- Mostrar estadísticas del día
-SELECT * FROM estadisticas_diarias WHERE fecha_venta = CURRENT_DATE;
+-- Mostrar estadísticas del día con ganancias
+SELECT * FROM estadisticas_diarias WHERE fecha = CURRENT_DATE;
 
 -- =====================================================
 -- MENSAJE DE CONFIRMACIÓN
 -- =====================================================
 
-SELECT 'Base de datos configurada correctamente. Sistema listo para usar!' as mensaje;
+SELECT 'Base de datos configurada correctamente con gestión de gastos!' as mensaje;
