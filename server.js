@@ -321,8 +321,8 @@ app.get('/api/reportes/estadisticas', async (req, res) => {
         const result = await pool.query(`
             SELECT 
                 COUNT(DISTINCT producto_id) as productos_diferentes,
-                COUNT(*) as total_ventas,
-                SUM(cantidad) as total_unidades,
+                COUNT(*) as total_transacciones,
+                SUM(cantidad) as cantidad_total_vendida,
                 SUM(total) as ingresos_totales,
                 AVG(total) as venta_promedio,
                 MIN(total) as venta_minima,
@@ -336,6 +336,23 @@ app.get('/api/reportes/estadisticas', async (req, res) => {
         console.error('Error al obtener estadísticas:', error);
         res.status(500).json({ error: 'Error al obtener estadísticas' });
     }
+});
+
+// ==================== REPORTES AVANZADOS ====================
+// Importar el módulo de reportes avanzados
+const reportesAvanzados = require('./reportes-avanzados');
+
+// Rutas para reportes avanzados
+app.get('/api/reportes/avanzados/dashboard', reportesAvanzados.getDashboardData);
+app.get('/api/reportes/avanzados/semanal', reportesAvanzados.getReporteSemanal);
+app.get('/api/reportes/avanzados/mensual', reportesAvanzados.getReporteMensual);
+app.get('/api/reportes/avanzados/predicciones', reportesAvanzados.getPredicciones);
+app.get('/api/reportes/avanzados/tendencias', reportesAvanzados.getTendencias);
+app.get('/api/reportes/avanzados/comparativo', reportesAvanzados.getComparativo);
+
+// Ruta para la página de reportes avanzados
+app.get('/reportes-avanzados', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'reportes-avanzados.html'));
 });
 
 // ==================== INICIAR SERVIDOR ====================
