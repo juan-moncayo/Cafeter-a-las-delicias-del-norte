@@ -301,124 +301,154 @@
             }
             
             .header h1 {
-                font-size: 2rem;
+                font-size: 1.8rem;
+                margin-bottom: 8px;
             }
             
             .header p {
-                font-size: 1rem;
+                font-size: 0.95rem;
             }
             
             .back-btn {
+                position: fixed;
                 top: 10px;
                 left: 10px;
-                padding: 10px 15px;
-                font-size: 0.9rem;
-            }
-            
-            .charts-grid {
-                grid-template-columns: 1fr;
-                gap: 20px;
-            }
-            
-            .chart-wrapper {
-                height: 250px;
-            }
-            
-            .chart-card {
-                padding: 20px;
-            }
-            
-            .chart-title {
-                font-size: 1.1rem;
-                margin-bottom: 15px;
+                padding: 8px 15px;
+                font-size: 0.85rem;
+                z-index: 1001;
             }
             
             .filters {
                 padding: 15px;
                 flex-direction: column;
                 align-items: stretch;
-                gap: 15px;
+                gap: 12px;
+                margin-bottom: 15px;
             }
             
             .filter-group {
                 width: 100%;
             }
             
+            .filter-group label {
+                font-size: 0.85rem;
+                margin-bottom: 3px;
+            }
+            
             .filter-input {
                 width: 100%;
-                padding: 10px;
+                padding: 10px 12px;
+                font-size: 0.9rem;
             }
             
             .refresh-btn {
                 width: 100%;
                 padding: 12px;
-                margin-top: 10px;
+                margin-top: 5px;
+                font-size: 0.9rem;
             }
             
             .stats-grid {
                 grid-template-columns: repeat(2, 1fr);
-                gap: 15px;
+                gap: 12px;
+                margin-bottom: 20px;
             }
             
             .stat-card {
-                padding: 20px 15px;
+                padding: 15px 12px;
             }
             
             .stat-value {
-                font-size: 1.8rem;
+                font-size: 1.4rem;
+                margin-bottom: 6px;
             }
             
             .stat-label {
-                font-size: 0.9rem;
+                font-size: 0.8rem;
+                margin-bottom: 4px;
+            }
+            
+            .stat-change {
+                font-size: 0.75rem;
+            }
+            
+            .charts-grid {
+                grid-template-columns: 1fr;
+                gap: 15px;
+                margin-bottom: 20px;
+            }
+            
+            .chart-card {
+                padding: 15px;
+            }
+            
+            .chart-title {
+                font-size: 1rem;
+                margin-bottom: 12px;
+            }
+            
+            .chart-wrapper {
+                height: 220px;
             }
             
             .predictions {
-                padding: 20px;
+                padding: 20px 15px;
+                margin-bottom: 20px;
             }
             
             .predictions h3 {
-                font-size: 1.3rem;
+                font-size: 1.2rem;
+                margin-bottom: 15px;
             }
             
             .predictions-grid {
                 grid-template-columns: repeat(2, 1fr);
-                gap: 15px;
+                gap: 10px;
             }
             
             .prediction-card {
-                padding: 15px;
+                padding: 12px 8px;
             }
             
             .prediction-value {
-                font-size: 1.5rem;
+                font-size: 1.2rem;
+                margin-bottom: 4px;
             }
             
             .prediction-label {
-                font-size: 0.8rem;
+                font-size: 0.75rem;
+                line-height: 1.2;
             }
             
             .top-products {
-                padding: 20px;
+                padding: 20px 15px;
             }
             
             .top-products h3 {
-                font-size: 1.3rem;
+                font-size: 1.2rem;
+                margin-bottom: 15px;
             }
             
             .product-item {
-                padding: 12px;
+                padding: 10px;
                 flex-direction: column;
                 align-items: flex-start;
-                gap: 8px;
+                gap: 6px;
+                margin-bottom: 8px;
             }
             
             .product-name {
-                font-size: 0.95rem;
+                font-size: 0.9rem;
+                line-height: 1.3;
             }
             
             .product-stats {
                 text-align: left;
-                font-size: 0.9rem;
+                font-size: 0.8rem;
+            }
+            
+            .product-stats div {
+                margin-bottom: 2px;
             }
         }
 
@@ -429,83 +459,186 @@
             
             .header {
                 padding: 15px 10px;
+                margin-bottom: 15px;
             }
             
             .header h1 {
-                font-size: 1.8rem;
+                font-size: 1.5rem;
+                margin-bottom: 6px;
+            }
+            
+            .header p {
+                font-size: 0.85rem;
+                line-height: 1.3;
             }
             
             .back-btn {
-                padding: 8px 12px;
+                padding: 6px 12px;
                 font-size: 0.8rem;
+                border-radius: 20px;
             }
             
-            .stats-grid {
-                grid-template-columns: 1fr;
-                gap: 10px;
-            }
-            
-            .stat-card {
-                padding: 15px 10px;
-            }
-            
-            .stat-value {
-                font-size: 1.6rem;
-            }
-            
-            .chart-wrapper {
-                height: 200px;
-            }
-            
-            .chart-card {
-                padding: 15px;
-            }
-            
-            .chart-title {
-                font-size: 1rem;
-            }
-            
-            .predictions {
-                padding: 15px;
-            }
-            
-            .predictions-grid {
-                grid-template-columns: 1fr;
-                gap: 10px;
-            }
-            
-            .prediction-card {
+            .filters {
                 padding: 12px;
+                gap: 10px;
+                margin-bottom: 12px;
             }
             
-            .prediction-value {
-                font-size: 1.3rem;
-            }
-            
-            .top-products {
-                padding: 15px;
-            }
-            
-            .product-item {
-                padding: 10px;
-            }
-            
-            .product-name {
-                font-size: 0.9rem;
-            }
-            
-            .product-stats {
+            .filter-group label {
                 font-size: 0.8rem;
             }
             
             .filter-input {
                 padding: 8px 10px;
-                font-size: 0.9rem;
+                font-size: 0.85rem;
             }
             
             .refresh-btn {
                 padding: 10px;
+                font-size: 0.85rem;
+            }
+            
+            .stats-grid {
+                grid-template-columns: 1fr;
+                gap: 8px;
+                margin-bottom: 15px;
+            }
+            
+            .stat-card {
+                padding: 12px 10px;
+            }
+            
+            .stat-value {
+                font-size: 1.3rem;
+                margin-bottom: 5px;
+            }
+            
+            .stat-label {
+                font-size: 0.75rem;
+                margin-bottom: 3px;
+            }
+            
+            .stat-change {
+                font-size: 0.7rem;
+            }
+            
+            .charts-grid {
+                gap: 12px;
+                margin-bottom: 15px;
+            }
+            
+            .chart-card {
+                padding: 12px;
+            }
+            
+            .chart-title {
                 font-size: 0.9rem;
+                margin-bottom: 10px;
+            }
+            
+            .chart-wrapper {
+                height: 180px;
+            }
+            
+            .predictions {
+                padding: 15px 10px;
+                margin-bottom: 15px;
+            }
+            
+            .predictions h3 {
+                font-size: 1.1rem;
+                margin-bottom: 12px;
+            }
+            
+            .predictions-grid {
+                grid-template-columns: 1fr;
+                gap: 8px;
+            }
+            
+            .prediction-card {
+                padding: 10px;
+            }
+            
+            .prediction-value {
+                font-size: 1.1rem;
+                margin-bottom: 3px;
+            }
+            
+            .prediction-label {
+                font-size: 0.7rem;
+                line-height: 1.2;
+            }
+            
+            .top-products {
+                padding: 15px 10px;
+            }
+            
+            .top-products h3 {
+                font-size: 1.1rem;
+                margin-bottom: 12px;
+            }
+            
+            .product-item {
+                padding: 8px;
+                margin-bottom: 6px;
+            }
+            
+            .product-name {
+                font-size: 0.85rem;
+                line-height: 1.2;
+            }
+            
+            .product-stats {
+                font-size: 0.75rem;
+            }
+            
+            .loading {
+                padding: 20px;
+                font-size: 0.9rem;
+            }
+            
+            .spinner {
+                width: 25px;
+                height: 25px;
+                margin-bottom: 8px;
+            }
+        }
+
+        @media (max-width: 375px) {
+            .header h1 {
+                font-size: 1.4rem;
+            }
+            
+            .header p {
+                font-size: 0.8rem;
+            }
+            
+            .stat-value {
+                font-size: 1.2rem;
+            }
+            
+            .stat-label {
+                font-size: 0.7rem;
+            }
+            
+            .chart-wrapper {
+                height: 160px;
+            }
+            
+            .prediction-value {
+                font-size: 1rem;
+            }
+            
+            .prediction-label {
+                font-size: 0.65rem;
+            }
+            
+            .product-name {
+                font-size: 0.8rem;
+            }
+            
+            .product-stats {
+                font-size: 0.7rem;
             }
         }
     </style>
