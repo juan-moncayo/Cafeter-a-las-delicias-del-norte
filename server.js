@@ -535,17 +535,228 @@ app.get('/api/reportes/estadisticas', async (req, res) => {
     }
 });
 
-// ==================== REPORTES AVANZADOS ====================
-// Importar el módulo de reportes avanzados
-const reportesAvanzados = require('./reportes-avanzados');
+// ==================== REPORTES AVANZADOS INTEGRADOS ====================
+// Funciones de reportes avanzados integradas directamente
 
-// Rutas para reportes avanzados
-app.get('/api/reportes/avanzados/dashboard', reportesAvanzados.getDashboardData);
-app.get('/api/reportes/avanzados/semanal', reportesAvanzados.getReporteSemanal);
-app.get('/api/reportes/avanzados/mensual', reportesAvanzados.getReporteMensual);
-app.get('/api/reportes/avanzados/predicciones', reportesAvanzados.getPredicciones);
-app.get('/api/reportes/avanzados/tendencias', reportesAvanzados.getTendencias);
-app.get('/api/reportes/avanzados/comparativo', reportesAvanzados.getComparativo);
+// Dashboard principal
+async function getDashboardDataIntegrado(req, res) {
+    try {
+        console.log('☕ Generando dashboard principal integrado...');
+        
+        // Estadísticas del día actual
+        const hoyStats = await pool.query(`
+            SELECT 
+                COALESCE(COUNT(*), 0) as transacciones_hoy,
+                COALESCE(SUM(cantidad), 0) as unidades_hoy,
+                COALESCE(SUM(total), 0) as ingresos_hoy,
+                COALESCE(COUNT(DISTINCT producto_id), 0) as productos_vendidos_hoy
+            FROM ventas 
+            WHERE fecha_venta = CURRENT_DATE
+        `);
+
+        // Gastos del día
+        const gastosHoy = await pool.query(`
+            SELECT COALESCE(SUM(monto), 0) as gastos_hoy
+            FROM gastos 
+            WHERE fecha_gasto = CURRENT_DATE AND activo = true
+        `);
+
+        // Estadísticas de ayer
+        const ayerStats = await pool.query(`
+            SELECT 
+                COALESCE(COUNT(*), 0) as transacciones_ayer,
+                COALESCE(SUM(cantidad), 0) as unidades_ayer,
+                COALESCE(SUM(total), 0) as ingresos_ayer
+            FROM ventas 
+            WHERE fecha_venta = CURRENT_DATE - INTERVAL '1 day'
+        `);
+
+        const gastosAyer = await pool.query(`
+            SELECT COALESCE(SUM(monto), 0) as gastos_ayer
+            FROM gastos 
+            WHERE fecha_gasto = CURRENT_DATE - INTERVAL '1 day' AND activo = true
+        `);
+
+        // Top productos
+        const topProductos = await pool.query(`
+            SELECT 
+                p.nombre,
+                COALESCE(SUM(v.cantidad), 0) as total_cantidad,
+                COALESCE(SUM(v.total), 0) as total_ingresos
+            FROM productos p
+            LEFT JOIN ventas v ON p.id = v.producto_id 
+                AND v.fecha_venta >= CURRENT_DATE - INTERVAL '7 days'
+            WHERE p.activo = true
+            GROUP BY p.id, p.nombre
+            ORDER BY total_ingresos DESC
+            LIMIT 5
+        `);
+
+        // Tendencia 7 días
+        const tendencia7Dias = await pool.query(`
+            SELECT 
+                fecha_venta,
+                COALESCE(SUM(total), 0) as ingresos
+            FROM ventas
+            WHERE fecha_venta >= CURRENT_DATE - INTERVAL '6 days'
+            GROUP BY fecha_venta
+            ORDER BY fecha_venta
+        `);
+
+        const hoyData = hoyStats.rows[0] || {};
+        const gastosHoyData = gastosHoy.rows[0] || {};
+        const ayerData = ayerStats.rows[0] || {};
+        const gastosAyerData = gastosAyer.rows[0] || {};
+
+        const response = {
+            hoy: {
+                transacciones_hoy: parseInt(hoyData.transacciones_hoy) || 0,
+                unidades_hoy: parseInt(hoyData.unidades_hoy) || 0,
+                ingresos_hoy: parseFloat(hoyData.ingresos_hoy) || 0,
+                productos_vendidos_hoy: parseInt(hoyData.productos_vendidos_hoy) || 0,
+                gastos_hoy: parseFloat(gastosHoyData.gastos_hoy) || 0,
+                ganancia_neta_hoy: (parseFloat(hoyData.ingresos_hoy) || 0) - (parseFloat(gastosHoyData.gastos_hoy) || 0)
+            },
+            ayer: {
+                transacciones_ayer: parseInt(ayerData.transacciones_ayer) || 0,
+                unidades_ayer: parseInt(ayerData.unidades_ayer) || 0,
+                ingresos_ayer: parseFloat(ayerData.ingresos_ayer) || 0,
+                gastos_ayer: parseFloat(gastosAyerData.gastos_ayer) || 0,
+                ganancia_neta_ayer: (parseFloat(ayerData.ingresos_ayer) || 0) - (parseFloat(gastosAyerData.gastos_ayer) || 0)
+            },
+            topProductos: topProductos.rows,
+            tendencia30Dias: tendencia7Dias.rows,
+            metadata: {
+                cafeteria: "Las Delicias del Norte",
+                timestamp: new Date().toISOString()
+            }
+        };
+
+        console.log(`📊 Dashboard integrado generado exitosamente`);
+        res.json(response);
+
+    } catch (error) {
+        console.error('❌ Error en dashboard integrado:', error);
+        res.status(500).json({ 
+            error: 'Error al obtener dashboard integrado',
+            details: error.message
+        });
+    }
+}
+
+// Reporte semanal integrado
+async function getReporteSemanalIntegrado(req, res) {
+    try {
+        console.log('📅 Generando reporte semanal integrado...');
+        
+        const ventasSemana = await pool.query(`
+            SELECT 
+                fecha_venta,
+                TO_CHAR(fecha_venta, 'Day') as nombre_dia,
+                COALESCE(SUM(total), 0) as ingresos,
+                COALESCE(COUNT(*), 0) as transacciones
+            FROM ventas
+            WHERE fecha_venta >= CURRENT_DATE - INTERVAL '6 days'
+            GROUP BY fecha_venta
+            ORDER BY fecha_venta
+        `);
+
+        const response = {
+            ventasPorDia: ventasSemana.rows,
+            periodo: {
+                inicio: new Date(Date.now() - 6*24*60*60*1000).toISOString().split('T')[0],
+                fin: new Date().toISOString().split('T')[0]
+            },
+            timestamp: new Date().toISOString()
+        };
+
+        res.json(response);
+
+    } catch (error) {
+        console.error('❌ Error en reporte semanal integrado:', error);
+        res.status(500).json({ 
+            error: 'Error al obtener reporte semanal',
+            details: error.message
+        });
+    }
+}
+
+// Predicciones integradas
+async function getPrediccionesIntegrado(req, res) {
+    try {
+        console.log('🔮 Generando predicciones integradas...');
+        
+        const promedios = await pool.query(`
+            SELECT 
+                COALESCE(AVG(ingresos_dia), 0) as promedio_ingresos_diarios,
+                COALESCE(AVG(unidades_dia), 0) as promedio_unidades_diarias
+            FROM (
+                SELECT 
+                    fecha_venta,
+                    SUM(total) as ingresos_dia,
+                    SUM(cantidad) as unidades_dia
+                FROM ventas
+                WHERE fecha_venta >= CURRENT_DATE - INTERVAL '6 days'
+                GROUP BY fecha_venta
+            ) as stats_diarias
+        `);
+
+        const promediosData = promedios.rows[0] || {};
+        
+        const response = {
+            promediosDiarios: promediosData,
+            prediccionesSemanales: {
+                ingresosSemana: Math.round((parseFloat(promediosData.promedio_ingresos_diarios) || 0) * 7),
+                unidadesSemana: Math.round((parseFloat(promediosData.promedio_unidades_diarias) || 0) * 7)
+            },
+            prediccionesMensuales: {
+                ingresosMes: Math.round((parseFloat(promediosData.promedio_ingresos_diarios) || 0) * 30),
+                unidadesMes: Math.round((parseFloat(promediosData.promedio_unidades_diarias) || 0) * 30)
+            },
+            timestamp: new Date().toISOString()
+        };
+
+        res.json(response);
+
+    } catch (error) {
+        console.error('❌ Error en predicciones integradas:', error);
+        res.status(500).json({ 
+            error: 'Error al obtener predicciones',
+            details: error.message
+        });
+    }
+}
+
+// Usar funciones integradas si el módulo externo falla
+if (!reportesAvanzados || typeof reportesAvanzados.getDashboardData !== 'function') {
+    console.log('⚠️ Usando reportes integrados como fallback');
+    
+    app.get('/api/reportes/avanzados/dashboard', getDashboardDataIntegrado);
+    app.get('/api/reportes/avanzados/semanal', getReporteSemanalIntegrado);
+    app.get('/api/reportes/avanzados/predicciones', getPrediccionesIntegrado);
+    
+    // Rutas simplificadas para las otras funciones
+    app.get('/api/reportes/avanzados/mensual', (req, res) => {
+        res.json({
+            mensaje: 'Función en desarrollo',
+            timestamp: new Date().toISOString()
+        });
+    });
+    
+    app.get('/api/reportes/avanzados/tendencias', (req, res) => {
+        res.json({
+            mensaje: 'Función en desarrollo', 
+            timestamp: new Date().toISOString()
+        });
+    });
+    
+    app.get('/api/reportes/avanzados/comparativo', (req, res) => {
+        res.json({
+            mensaje: 'Función en desarrollo',
+            timestamp: new Date().toISOString()
+        });
+    });
+}
 
 // Ruta para la página de reportes avanzados
 app.get('/reportes-avanzados', (req, res) => {
