@@ -381,7 +381,59 @@
             align-items: center;
         }
 
-        /* RESPONSIVE MÓVIL SIMPLIFICADO */
+        /* MOBILE CARDS - OCULTAS POR DEFECTO */
+        .mobile-table {
+            display: none;
+        }
+
+        .mobile-row {
+            background: white;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            padding: 12px;
+            border: 1px solid rgba(139, 69, 19, 0.2);
+            box-shadow: 0 2px 8px rgba(139, 69, 19, 0.1);
+        }
+
+        .mobile-row-header {
+            font-weight: bold;
+            color: #5D4037;
+            margin-bottom: 8px;
+            font-size: 1rem;
+        }
+
+        .mobile-row-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 6px;
+            font-size: 0.9rem;
+        }
+
+        .mobile-row-label {
+            color: #6D4C41;
+            font-weight: 500;
+        }
+
+        .mobile-row-value {
+            color: #3E2723;
+            font-weight: 600;
+        }
+
+        .mobile-actions {
+            display: flex;
+            gap: 8px;
+            margin-top: 10px;
+        }
+
+        .mobile-actions .btn-sm {
+            flex: 1;
+            min-height: 40px;
+            padding: 8px 12px;
+            font-size: 0.8rem;
+        }
+
+        /* RESPONSIVE MÓVIL */
         @media screen and (max-width: 768px) {
             .container {
                 padding: 10px;
@@ -419,57 +471,13 @@
                 margin-bottom: 0;
             }
             
-            /* SOLUCIÓN PARA TABLAS MÓVILES - FORMATO CARD */
-            .table-container {
-                overflow: visible;
-            }
-            
+            /* OCULTAR TABLA NORMAL Y MOSTRAR CARDS EN MÓVIL */
             .table {
-                display: none; /* Ocultar tabla normal en móvil */
+                display: none;
             }
             
             .mobile-table {
                 display: block;
-            }
-            
-            .mobile-row {
-                background: white;
-                border-radius: 10px;
-                margin-bottom: 10px;
-                padding: 12px;
-                border: 1px solid rgba(139, 69, 19, 0.2);
-                box-shadow: 0 2px 8px rgba(139, 69, 19, 0.1);
-            }
-            
-            .mobile-row-header {
-                font-weight: bold;
-                color: #5D4037;
-                margin-bottom: 8px;
-                font-size: 1rem;
-            }
-            
-            .mobile-row-content {
-                display: flex;
-                justify-content: space-between;
-                align-items: center;
-                margin-bottom: 6px;
-                font-size: 0.9rem;
-            }
-            
-            .mobile-row-label {
-                color: #6D4C41;
-                font-weight: 500;
-            }
-            
-            .mobile-row-value {
-                color: #3E2723;
-                font-weight: 600;
-            }
-            
-            .mobile-actions {
-                display: flex;
-                gap: 8px;
-                margin-top: 10px;
             }
             
             .mobile-actions .btn-sm {
@@ -496,192 +504,20 @@
             .stat-label {
                 font-size: 0.7rem;
             }
-        }
-        
-        @media screen and (min-width: 769px) {
-            .mobile-table {
-                display: none;
-            }
-        }
-
-        /* MÓVIL PEQUEÑO (iPhone SE, etc.) */
-        @media screen and (max-width: 480px) {
-            .container {
-                padding: 8px 5px;
+            
+            .modal-content {
+                margin: 15% auto;
+                width: 95%;
+                padding: 20px 15px;
             }
             
-            .header {
-                padding: 12px 10px;
-                margin-bottom: 12px;
+            .modal-buttons {
+                flex-direction: column;
+                gap: 10px;
             }
             
-            .header h1 {
-                font-size: 1.2rem;
-                line-height: 1.2;
-            }
-            
-            .header p {
-                font-size: 0.75rem;
-            }
-            
-            .tab-content {
-                padding: 12px 10px;
-                min-height: 300px;
-            }
-            
-            .section-title {
-                font-size: 1rem;
-                margin-bottom: 12px;
-            }
-            
-            .form-control {
-                padding: 12px 10px;
-                font-size: 16px;
-            }
-            
-            .btn {
-                padding: 14px 16px;
-                font-size: 0.95rem;
-                min-height: 48px;
-            }
-            
-            .stats-grid {
-                grid-template-columns: 1fr;
-                gap: 8px;
-            }
-            
-            .stat-card {
-                padding: 10px 6px;
-            }
-            
-            .stat-value {
-                font-size: 1.2rem;
-            }
-            
-            .stat-label {
-                font-size: 0.65rem;
-            }
-            
-            .table {
-                min-width: 500px;
-                font-size: 0.8rem;
-            }
-            
-            .table th,
-            .table td {
-                padding: 8px 4px;
-                font-size: 0.75rem;
-            }
-            
-            .btn-sm {
-                padding: 8px 10px;
-                font-size: 0.75rem;
-                min-height: 36px;
-            }
-        }
-
-        /* MEJORAS ESPECÍFICAS PARA TÁCTIL */
-        @media (hover: none) and (pointer: coarse) {
-            .btn {
-                min-height: 50px;
-                font-size: 1rem;
-            }
-            
-            .btn-sm {
-                min-height: 42px;
-                font-size: 0.85rem;
-            }
-            
-            .tab-button {
-                min-height: 55px;
-                padding: 14px 10px;
-            }
-            
-            .form-control {
-                min-height: 50px;
-            }
-            
-            .table th,
-            .table td {
-                padding: 12px 8px;
-            }
-        }
-
-        /* OPTIMIZACIONES PARA LANDSCAPE MÓVIL */
-        @media screen and (max-width: 768px) and (orientation: landscape) {
-            .header {
-                padding: 10px 12px;
-                margin-bottom: 10px;
-            }
-            
-            .header h1 {
-                font-size: 1.3rem;
-            }
-            
-            .header p {
-                font-size: 0.8rem;
-            }
-            
-            .tab-content {
-                min-height: 250px;
-                padding: 12px;
-            }
-            
-            .stats-grid {
-                grid-template-columns: repeat(4, 1fr);
-                gap: 8px;
-            }
-            
-            .stat-card {
-                padding: 8px 6px;
-            }
-            
-            .stat-value {
-                font-size: 1.1rem;
-            }
-            
-            .stat-label {
-                font-size: 0.65rem;
-            }
-        }
-
-        /* SCROLL SUAVE EN CONTENEDORES */
-        .table-container {
-            scroll-behavior: smooth;
-        }
-        
-        .tabs {
-            scroll-behavior: smooth;
-        }
-
-        /* MEJORAS DE CONTRASTE PARA ACCESIBILIDAD */
-        @media (prefers-contrast: high) {
-            .form-control {
-                border-width: 3px;
-                border-color: #5D4037;
-            }
-            
-            .btn {
-                border: 2px solid rgba(255,255,255,0.3);
-            }
-            
-            .table th {
-                background: #5D4037;
-            }
-        }
-
-        /* REDUCIR ANIMACIONES PARA USUARIOS QUE LAS PREFIEREN MÍNIMAS */
-        @media (prefers-reduced-motion: reduce) {
-            * {
-                animation-duration: 0.01ms !important;
-                animation-iteration-count: 1 !important;
-                transition-duration: 0.01ms !important;
-            }
-            
-            .spinner {
-                animation: none;
-                border: 3px solid #8B4513;
-                border-top: 3px solid transparent;
+            .modal-buttons .btn {
+                margin-bottom: 0;
             }
         }
     </style>
@@ -860,8 +696,10 @@
         // ==================== GESTIÓN DE PRODUCTOS ====================
         async function cargarProductos() {
             try {
+                console.log('Cargando productos...');
                 const response = await fetch('/api/productos');
                 const productos = await response.json();
+                console.log('Productos recibidos:', productos);
                 
                 // Actualizar dropdown de ventas
                 const select = document.getElementById('producto_id');
@@ -870,19 +708,21 @@
                 productos.forEach(producto => {
                     const option = document.createElement('option');
                     option.value = producto.id;
-                    option.textContent = `${producto.nombre} - ${formatearPrecio(producto.precio)}`;
+                    option.textContent = `${producto.nombre} - $${formatearPrecio(producto.precio)}`;
                     select.appendChild(option);
                 });
 
                 // Actualizar lista de productos
                 mostrarListaProductos(productos);
             } catch (error) {
+                console.error('Error al cargar productos:', error);
                 mostrarError('Error al cargar productos: ' + error.message);
             }
         }
 
         function mostrarListaProductos(productos) {
             const container = document.getElementById('listaProductos');
+            console.log('Mostrando productos:', productos);
             
             if (productos.length === 0) {
                 container.innerHTML = '<div class="no-data">No hay productos registrados</div>';
@@ -906,7 +746,7 @@
                 html += `
                     <tr>
                         <td><strong>${producto.nombre}</strong></td>
-                        <td>${formatearPrecio(producto.precio)}</td>
+                        <td>$${formatearPrecio(producto.precio)}</td>
                         <td>
                             <button class="btn btn-warning btn-sm" onclick="editarProducto(${producto.id}, '${producto.nombre.replace(/'/g, "\\'")}', ${producto.precio})" style="margin-right: 5px;">
                                 ✏️ Editar
@@ -919,7 +759,40 @@
                 `;
             });
 
-            html += '</tbody></table></div>';
+            html += `
+                        </tbody>
+                    </table>
+                    
+                    <!-- Versión móvil -->
+                    <div class="mobile-table">
+            `;
+            
+            productos.forEach(producto => {
+                html += `
+                    <div class="mobile-row">
+                        <div class="mobile-row-header">${producto.nombre}</div>
+                        <div class="mobile-row-content">
+                            <span class="mobile-row-label">Precio:</span>
+                            <span class="mobile-row-value">$${formatearPrecio(producto.precio)}</span>
+                        </div>
+                        <div class="mobile-actions">
+                            <button class="btn btn-warning btn-sm" onclick="editarProducto(${producto.id}, '${producto.nombre.replace(/'/g, "\\'")}', ${producto.precio})">
+                                ✏️ Editar
+                            </button>
+                            <button class="btn btn-danger btn-sm" onclick="eliminarProducto(${producto.id}, '${producto.nombre.replace(/'/g, "\\'")}')">
+                                🗑️ Borrar
+                            </button>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            html += `
+                    </div>
+                </div>
+            `;
+            
+            console.log('HTML generado:', html);
             container.innerHTML = html;
         }
 
@@ -1054,10 +927,14 @@
                 `;
             });
 
-            html += '</tbody></table>';
+            html += `
+                        </tbody>
+                    </table>
+                    
+                    <!-- Versión móvil -->
+                    <div class="mobile-table">
+            `;
             
-            // Versión móvil - formato card
-            html += '<div class="mobile-table">';
             ventas.forEach(venta => {
                 html += `
                     <div class="mobile-row">
@@ -1082,7 +959,11 @@
                     </div>
                 `;
             });
-            html += '</div></div>';
+            
+            html += `
+                    </div>
+                </div>
+            `;
 
             container.innerHTML = html;
         }
@@ -1187,10 +1068,14 @@
                 `;
             });
 
-            html += '</tbody></table>';
+            html += `
+                        </tbody>
+                    </table>
+                    
+                    <!-- Versión móvil -->
+                    <div class="mobile-table">
+            `;
             
-            // Versión móvil - formato card
-            html += '<div class="mobile-table">';
             gastos.forEach(gasto => {
                 html += `
                     <div class="mobile-row">
@@ -1214,7 +1099,11 @@
                     </div>
                 `;
             });
-            html += '</div></div>';
+            
+            html += `
+                    </div>
+                </div>
+            `;
             
             container.innerHTML = html;
         }
