@@ -727,10 +727,50 @@ async function getPrediccionesIntegrado(req, res) {
     }
 }
 
-// Usar funciones integradas si el módulo externo falla
-if (!reportesAvanzados || typeof reportesAvanzados.getDashboardData !== 'function') {
-    console.log('⚠️ Usando reportes integrados como fallback');
+// ==================== CONFIGURAR RUTAS DE REPORTES AVANZADOS ====================
+// Intentar cargar módulo externo, si falla usar funciones integradas
+let reportesAvanzados = null;
+
+try {
+    reportesAvanzados = require('./reportes-avanzados');
+    console.log('✅ Módulo de reportes avanzados externo cargado correctamente');
     
+    // Usar módulo externo
+    app.get('/api/reportes/avanzados/dashboard', async (req, res) => {
+        try {
+            await reportesAvanzados.getDashboardData(req, res);
+        } catch (error) {
+            console.error('❌ Error en dashboard externo, usando fallback:', error);
+            await getDashboardDataIntegrado(req, res);
+        }
+    });
+    
+    app.get('/api/reportes/avanzados/semanal', async (req, res) => {
+        try {
+            await reportesAvanzados.getReporteSemanal(req, res);
+        } catch (error) {
+            console.error('❌ Error en semanal externo, usando fallback:', error);
+            await getReporteSemanalIntegrado(req, res);
+        }
+    });
+    
+    app.get('/api/reportes/avanzados/predicciones', async (req, res) => {
+        try {
+            await reportesAvanzados.getPredicciones(req, res);
+        } catch (error) {
+            console.error('❌ Error en predicciones externo, usando fallback:', error);
+            await getPrediccionesIntegrado(req, res);
+        }
+    });
+    
+    app.get('/api/reportes/avanzados/mensual', reportesAvanzados.getReporteMensual);
+    app.get('/api/reportes/avanzados/tendencias', reportesAvanzados.getTendencias);
+    app.get('/api/reportes/avanzados/comparativo', reportesAvanzados.getComparativo);
+
+} catch (error) {
+    console.log('⚠️ No se pudo cargar módulo externo, usando reportes integrados:', error.message);
+    
+    // Usar funciones integradas
     app.get('/api/reportes/avanzados/dashboard', getDashboardDataIntegrado);
     app.get('/api/reportes/avanzados/semanal', getReporteSemanalIntegrado);
     app.get('/api/reportes/avanzados/predicciones', getPrediccionesIntegrado);
@@ -738,21 +778,24 @@ if (!reportesAvanzados || typeof reportesAvanzados.getDashboardData !== 'functio
     // Rutas simplificadas para las otras funciones
     app.get('/api/reportes/avanzados/mensual', (req, res) => {
         res.json({
-            mensaje: 'Función en desarrollo',
+            mensaje: 'Función en desarrollo - Módulo integrado',
+            ventasPorDia: [],
             timestamp: new Date().toISOString()
         });
     });
     
     app.get('/api/reportes/avanzados/tendencias', (req, res) => {
         res.json({
-            mensaje: 'Función en desarrollo', 
+            mensaje: 'Función en desarrollo - Módulo integrado',
+            analisisProductos: [],
             timestamp: new Date().toISOString()
         });
     });
     
     app.get('/api/reportes/avanzados/comparativo', (req, res) => {
         res.json({
-            mensaje: 'Función en desarrollo',
+            mensaje: 'Función en desarrollo - Módulo integrado',
+            comparacion: {},
             timestamp: new Date().toISOString()
         });
     });
