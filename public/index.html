@@ -151,6 +151,7 @@
             gap: 8px;
             text-decoration: none;
             min-height: 48px;
+            width: auto;
         }
 
         .btn-primary {
@@ -204,12 +205,12 @@
             -webkit-overflow-scrolling: touch;
             border-radius: 15px;
             box-shadow: 0 4px 15px rgba(139, 69, 19, 0.1);
+            margin-top: 20px;
         }
 
         .table {
             width: 100%;
             border-collapse: collapse;
-            margin-top: 20px;
             background: white;
             border-radius: 15px;
             overflow: hidden;
@@ -221,6 +222,7 @@
             padding: 12px 10px;
             text-align: left;
             border-bottom: 1px solid rgba(139, 69, 19, 0.1);
+            font-size: 0.95rem;
         }
 
         .table th {
@@ -362,169 +364,433 @@
             font-size: 1.1rem;
         }
 
-        /* RESPONSIVE MÓVIL - OPTIMIZADO PARA COLOMBIA */
-        @media (max-width: 768px) {
-            .container {
-                padding: 8px;
+        .section-title {
+            color: #5D4037;
+            margin-bottom: 20px;
+            font-size: 1.3rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .form-actions {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        /* RESPONSIVE MÓVIL MEJORADO PARA COLOMBIA */
+        @media screen and (max-width: 768px) {
+            body {
+                background-attachment: fixed;
+                background-size: cover;
             }
             
+            .container {
+                padding: 10px 8px;
+                margin: 0;
+                max-width: 100%;
+            }
+            
+            /* HEADER MÓVIL */
             .header {
-                padding: 20px 15px;
-                margin-bottom: 20px;
+                padding: 15px 12px;
+                margin-bottom: 15px;
+                border-radius: 12px;
+                box-shadow: 0 4px 20px rgba(139, 69, 19, 0.25);
             }
             
             .header h1 {
-                font-size: 1.6rem;
-                margin-bottom: 6px;
+                font-size: 1.4rem;
+                line-height: 1.2;
+                margin-bottom: 5px;
             }
             
             .header p {
-                font-size: 0.9rem;
+                font-size: 0.8rem;
+                line-height: 1.3;
             }
             
+            /* TABS MÓVIL */
             .tabs {
-                margin-bottom: 20px;
+                margin-bottom: 15px;
+                border-radius: 10px;
+                flex-wrap: nowrap;
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+                scrollbar-width: none;
+                -ms-overflow-style: none;
+            }
+            
+            .tabs::-webkit-scrollbar {
+                display: none;
             }
             
             .tab-button {
                 padding: 12px 8px;
-                font-size: 0.8rem;
-                font-weight: 700;
-            }
-            
-            .tab-content {
-                padding: 20px 15px;
-                border-radius: 15px;
-            }
-            
-            .stats-grid {
-                grid-template-columns: repeat(2, 1fr);
-                gap: 12px;
-                margin-bottom: 20px;
-            }
-            
-            .stat-card {
-                padding: 15px 10px;
-            }
-            
-            .stat-value {
-                font-size: 1.4rem;
-            }
-            
-            .stat-label {
                 font-size: 0.75rem;
-            }
-            
-            .form-group {
-                margin-bottom: 18px;
-            }
-            
-            .form-control {
-                padding: 12px 14px;
-                font-size: 16px; /* Evita zoom en iOS */
-                border-radius: 10px;
-            }
-            
-            .btn {
-                width: 100%;
-                padding: 16px;
-                font-size: 1rem;
                 font-weight: 700;
-                border-radius: 12px;
+                min-width: 70px;
+                flex-shrink: 0;
+                white-space: nowrap;
             }
             
-            .btn-sm {
-                width: auto;
-                padding: 10px 14px;
-                font-size: 0.85rem;
+            .tab-button span {
+                font-size: 0.7rem;
+                margin-top: 2px;
             }
             
-            .table th,
-            .table td {
-                padding: 8px 6px;
-                font-size: 0.85rem;
-            }
-            
-            .modal-content {
-                margin: 5% auto;
-                width: 95%;
-                padding: 25px 20px;
-                border-radius: 15px;
-            }
-            
-            .modal-buttons {
-                flex-direction: column;
-                gap: 12px;
-            }
-            
-            .alert {
-                padding: 12px 15px;
-                font-size: 0.9rem;
-            }
-        }
-
-        @media (max-width: 480px) {
-            .container {
-                padding: 5px;
-            }
-            
-            .header {
+            /* CONTENIDO DE TABS MÓVIL */
+            .tab-content {
                 padding: 15px 12px;
+                border-radius: 12px;
+                min-height: 350px;
+                box-shadow: 0 4px 20px rgba(139, 69, 19, 0.15);
+            }
+            
+            .section-title {
+                font-size: 1.1rem;
+                margin-bottom: 15px;
+                text-align: center;
+            }
+            
+            /* FORMULARIOS MÓVIL */
+            .form-group {
                 margin-bottom: 15px;
             }
             
-            .header h1 {
-                font-size: 1.4rem;
-            }
-            
-            .header p {
-                font-size: 0.85rem;
-            }
-            
-            .tab-content {
-                padding: 15px 12px;
-            }
-            
-            .stats-grid {
-                grid-template-columns: 1fr;
-                gap: 10px;
-            }
-            
-            .stat-card {
-                padding: 12px 10px;
-            }
-            
-            .stat-value {
-                font-size: 1.3rem;
+            .form-group label {
+                font-size: 0.9rem;
+                margin-bottom: 6px;
+                font-weight: 700;
             }
             
             .form-control {
                 padding: 14px 12px;
+                font-size: 16px; /* Previene zoom automático en iOS */
+                border-radius: 8px;
+                border-width: 2px;
+                background: white;
+                box-shadow: inset 0 1px 3px rgba(0,0,0,0.1);
+            }
+            
+            .form-control:focus {
+                border-color: #8B4513;
+                box-shadow: 0 0 0 2px rgba(139, 69, 19, 0.2), inset 0 1px 3px rgba(0,0,0,0.1);
+            }
+            
+            /* BOTONES MÓVIL */
+            .btn {
+                width: 100%;
+                padding: 16px 20px;
+                font-size: 1rem;
+                font-weight: 700;
+                border-radius: 10px;
+                margin-bottom: 10px;
+                min-height: 50px;
+                touch-action: manipulation;
+                -webkit-appearance: none;
+            }
+            
+            .form-actions {
+                flex-direction: column;
+                gap: 8px;
+                width: 100%;
+            }
+            
+            .form-actions .btn {
+                margin-bottom: 0;
+            }
+            
+            .btn-sm {
+                width: auto;
+                min-width: 80px;
+                padding: 10px 12px;
+                font-size: 0.8rem;
+                min-height: 40px;
+                margin-bottom: 0;
+            }
+            
+            /* TABLAS MÓVIL */
+            .table-container {
+                margin-top: 15px;
+                border-radius: 10px;
+                box-shadow: 0 2px 10px rgba(139, 69, 19, 0.15);
             }
             
             .table {
-                font-size: 0.8rem;
-                min-width: 500px;
+                min-width: 550px;
+                font-size: 0.85rem;
             }
             
             .table th,
             .table td {
-                padding: 6px 4px;
+                padding: 10px 6px;
+                font-size: 0.8rem;
+                white-space: nowrap;
+            }
+            
+            .table th {
+                font-size: 0.75rem;
+                font-weight: 700;
+            }
+            
+            .table td:first-child {
+                font-weight: 600;
+                color: #5D4037;
+            }
+            
+            /* ESTADÍSTICAS MÓVIL */
+            .stats-grid {
+                grid-template-columns: 1fr 1fr;
+                gap: 10px;
+                margin-bottom: 20px;
+            }
+            
+            .stat-card {
+                padding: 12px 8px;
+                border-radius: 10px;
+            }
+            
+            .stat-value {
+                font-size: 1.3rem;
+                margin-bottom: 3px;
+            }
+            
+            .stat-label {
+                font-size: 0.7rem;
+                line-height: 1.1;
+            }
+            
+            /* ALERTAS MÓVIL */
+            .alert {
+                padding: 12px 15px;
+                font-size: 0.9rem;
+                border-radius: 8px;
+                margin-bottom: 15px;
+            }
+            
+            /* MODAL MÓVIL */
+            .modal-content {
+                margin: 15% auto;
+                width: 95%;
+                max-width: 400px;
+                padding: 20px 15px;
+                border-radius: 12px;
+            }
+            
+            .modal h3 {
+                font-size: 1.1rem;
+                margin-bottom: 12px;
+            }
+            
+            .modal p {
+                font-size: 0.9rem;
+                margin-bottom: 20px;
+                line-height: 1.4;
+            }
+            
+            .modal-buttons {
+                flex-direction: column;
+                gap: 10px;
+            }
+            
+            .modal-buttons .btn {
+                margin-bottom: 0;
+            }
+            
+            /* NO DATA MÓVIL */
+            .no-data {
+                padding: 30px 15px;
+                font-size: 0.95rem;
+            }
+            
+            .loading {
+                padding: 30px 15px;
+                font-size: 0.9rem;
             }
         }
 
-        /* Mejoras para táctil */
-        @media (hover: none) and (pointer: coarse) {
+        /* MÓVIL PEQUEÑO (iPhone SE, etc.) */
+        @media screen and (max-width: 480px) {
+            .container {
+                padding: 8px 5px;
+            }
+            
+            .header {
+                padding: 12px 10px;
+                margin-bottom: 12px;
+            }
+            
+            .header h1 {
+                font-size: 1.2rem;
+                line-height: 1.2;
+            }
+            
+            .header p {
+                font-size: 0.75rem;
+            }
+            
+            .tab-content {
+                padding: 12px 10px;
+                min-height: 300px;
+            }
+            
+            .section-title {
+                font-size: 1rem;
+                margin-bottom: 12px;
+            }
+            
+            .form-control {
+                padding: 12px 10px;
+                font-size: 16px;
+            }
+            
             .btn {
-                min-height: 44px;
+                padding: 14px 16px;
+                font-size: 0.95rem;
+                min-height: 48px;
+            }
+            
+            .stats-grid {
+                grid-template-columns: 1fr;
+                gap: 8px;
+            }
+            
+            .stat-card {
+                padding: 10px 6px;
+            }
+            
+            .stat-value {
+                font-size: 1.2rem;
+            }
+            
+            .stat-label {
+                font-size: 0.65rem;
+            }
+            
+            .table {
+                min-width: 500px;
+                font-size: 0.8rem;
+            }
+            
+            .table th,
+            .table td {
+                padding: 8px 4px;
+                font-size: 0.75rem;
             }
             
             .btn-sm {
-                min-height: 40px;
+                padding: 8px 10px;
+                font-size: 0.75rem;
+                min-height: 36px;
+            }
+        }
+
+        /* MEJORAS ESPECÍFICAS PARA TÁCTIL */
+        @media (hover: none) and (pointer: coarse) {
+            .btn {
+                min-height: 50px;
+                font-size: 1rem;
+            }
+            
+            .btn-sm {
+                min-height: 42px;
+                font-size: 0.85rem;
             }
             
             .tab-button {
+                min-height: 55px;
+                padding: 14px 10px;
+            }
+            
+            .form-control {
                 min-height: 50px;
+            }
+            
+            .table th,
+            .table td {
+                padding: 12px 8px;
+            }
+        }
+
+        /* OPTIMIZACIONES PARA LANDSCAPE MÓVIL */
+        @media screen and (max-width: 768px) and (orientation: landscape) {
+            .header {
+                padding: 10px 12px;
+                margin-bottom: 10px;
+            }
+            
+            .header h1 {
+                font-size: 1.3rem;
+            }
+            
+            .header p {
+                font-size: 0.8rem;
+            }
+            
+            .tab-content {
+                min-height: 250px;
+                padding: 12px;
+            }
+            
+            .stats-grid {
+                grid-template-columns: repeat(4, 1fr);
+                gap: 8px;
+            }
+            
+            .stat-card {
+                padding: 8px 6px;
+            }
+            
+            .stat-value {
+                font-size: 1.1rem;
+            }
+            
+            .stat-label {
+                font-size: 0.65rem;
+            }
+        }
+
+        /* SCROLL SUAVE EN CONTENEDORES */
+        .table-container {
+            scroll-behavior: smooth;
+        }
+        
+        .tabs {
+            scroll-behavior: smooth;
+        }
+
+        /* MEJORAS DE CONTRASTE PARA ACCESIBILIDAD */
+        @media (prefers-contrast: high) {
+            .form-control {
+                border-width: 3px;
+                border-color: #5D4037;
+            }
+            
+            .btn {
+                border: 2px solid rgba(255,255,255,0.3);
+            }
+            
+            .table th {
+                background: #5D4037;
+            }
+        }
+
+        /* REDUCIR ANIMACIONES PARA USUARIOS QUE LAS PREFIEREN MÍNIMAS */
+        @media (prefers-reduced-motion: reduce) {
+            * {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+            }
+            
+            .spinner {
+                animation: none;
+                border: 3px solid #8B4513;
+                border-top: 3px solid transparent;
             }
         }
     </style>
@@ -554,7 +820,7 @@
         <div class="tab-content">
             <!-- Tab Ventas -->
             <div id="ventas" class="tab-pane active">
-                <h2 style="color: #5D4037; margin-bottom: 20px; font-size: 1.3rem;">🛒 Registrar Nueva Venta</h2>
+                <h2 class="section-title">🛒 Registrar Nueva Venta</h2>
                 <form id="ventaForm">
                     <div class="form-group">
                         <label for="producto_id">Producto:</label>
@@ -566,16 +832,18 @@
                         <label for="cantidad">Cantidad:</label>
                         <input type="number" id="cantidad" class="form-control" min="1" value="1" required>
                     </div>
-                    <button type="submit" class="btn btn-success">✅ Registrar Venta</button>
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn-success">✅ Registrar Venta</button>
+                    </div>
                 </form>
 
-                <h3 style="margin-top: 30px; color: #5D4037; font-size: 1.2rem;">☕ Ventas de Hoy</h3>
+                <h3 class="section-title" style="margin-top: 30px;">☕ Ventas de Hoy</h3>
                 <div id="ventasHoy"></div>
             </div>
 
             <!-- Tab Productos -->
             <div id="productos" class="tab-pane">
-                <h2 style="color: #5D4037; margin-bottom: 20px; font-size: 1.3rem;">🥐 Gestión de Productos</h2>
+                <h2 class="section-title">🥐 Gestión de Productos</h2>
                 <form id="productoForm">
                     <div class="form-group">
                         <label for="nombre_producto">Nombre del Producto:</label>
@@ -585,17 +853,19 @@
                         <label for="precio_producto">Precio (COP):</label>
                         <input type="number" id="precio_producto" class="form-control" step="100" min="0" required placeholder="2000">
                     </div>
-                    <button type="submit" class="btn btn-primary" id="btnProducto">➕ Agregar Producto</button>
-                    <button type="button" class="btn btn-warning" id="btnCancelar" onclick="cancelarEdicion()" style="display: none;">❌ Cancelar</button>
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn-primary" id="btnProducto">➕ Agregar Producto</button>
+                        <button type="button" class="btn btn-warning" id="btnCancelar" onclick="cancelarEdicion()" style="display: none;">❌ Cancelar</button>
+                    </div>
                 </form>
 
-                <h3 style="margin-top: 30px; color: #5D4037; font-size: 1.2rem;">📋 Lista de Productos</h3>
+                <h3 class="section-title" style="margin-top: 30px;">📋 Lista de Productos</h3>
                 <div id="listaProductos"></div>
             </div>
 
             <!-- Tab Gastos -->
             <div id="gastos" class="tab-pane">
-                <h2 style="color: #5D4037; margin-bottom: 20px; font-size: 1.3rem;">💸 Gestión de Gastos</h2>
+                <h2 class="section-title">💸 Gestión de Gastos</h2>
                 <form id="gastoForm">
                     <div class="form-group">
                         <label for="concepto_gasto">Concepto del Gasto:</label>
@@ -609,17 +879,19 @@
                         <label for="descripcion_gasto">Descripción (opcional):</label>
                         <textarea id="descripcion_gasto" class="form-control" rows="3" placeholder="Detalles del gasto..."></textarea>
                     </div>
-                    <button type="submit" class="btn btn-primary" id="btnGasto">➕ Agregar Gasto</button>
-                    <button type="button" class="btn btn-warning" id="btnCancelarGasto" onclick="cancelarEdicionGasto()" style="display: none;">❌ Cancelar</button>
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn-primary" id="btnGasto">➕ Agregar Gasto</button>
+                        <button type="button" class="btn btn-warning" id="btnCancelarGasto" onclick="cancelarEdicionGasto()" style="display: none;">❌ Cancelar</button>
+                    </div>
                 </form>
 
-                <h3 style="margin-top: 30px; color: #5D4037; font-size: 1.2rem;">💰 Gastos de Hoy</h3>
+                <h3 class="section-title" style="margin-top: 30px;">💰 Gastos de Hoy</h3>
                 <div id="listaGastos"></div>
             </div>
 
             <!-- Tab Reportes -->
             <div id="reportes" class="tab-pane">
-                <h2 style="color: #5D4037; margin-bottom: 20px; font-size: 1.3rem;">📈 Estadísticas y Reportes</h2>
+                <h2 class="section-title">📈 Estadísticas y Reportes</h2>
                 <div class="form-group">
                     <label for="fecha_reporte">Fecha del reporte:</label>
                     <input type="date" id="fecha_reporte" class="form-control" onchange="cargarReportes()">
@@ -707,7 +979,7 @@
                 productos.forEach(producto => {
                     const option = document.createElement('option');
                     option.value = producto.id;
-                    option.textContent = `${producto.nombre} - $${formatearPrecio(producto.precio)}`;
+                    option.textContent = `${producto.nombre} - ${formatearPrecio(producto.precio)}`;
                     select.appendChild(option);
                 });
 
@@ -743,9 +1015,9 @@
                 html += `
                     <tr>
                         <td><strong>${producto.nombre}</strong></td>
-                        <td>$${formatearPrecio(producto.precio)}</td>
+                        <td>${formatearPrecio(producto.precio)}</td>
                         <td>
-                            <button class="btn btn-warning btn-sm" onclick="editarProducto(${producto.id}, '${producto.nombre.replace(/'/g, "\\'")}', ${producto.precio})">
+                            <button class="btn btn-warning btn-sm" onclick="editarProducto(${producto.id}, '${producto.nombre.replace(/'/g, "\\'")}', ${producto.precio})" style="margin-right: 5px;">
                                 ✏️ Editar
                             </button>
                             <button class="btn btn-danger btn-sm" onclick="eliminarProducto(${producto.id}, '${producto.nombre.replace(/'/g, "\\'")}')">
