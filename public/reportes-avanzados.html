@@ -235,10 +235,6 @@
             font-size: 0.9rem;
         }
 
-        .product-stats div {
-            margin-bottom: 2px;
-        }
-
         .filters {
             background: rgba(255,255,255,0.95);
             backdrop-filter: blur(15px);
@@ -320,6 +316,16 @@
             100% { transform: rotate(360deg); }
         }
 
+        .error-message {
+            background: rgba(211, 47, 47, 0.1);
+            border: 2px solid #D32F2F;
+            color: #C62828;
+            padding: 20px;
+            border-radius: 15px;
+            text-align: center;
+            margin: 20px 0;
+        }
+
         /* RESPONSIVE MÓVIL OPTIMIZADO */
         @media (max-width: 768px) {
             body {
@@ -368,7 +374,7 @@
             .filter-input {
                 width: 100%;
                 padding: 12px 14px;
-                font-size: 16px; /* Evita zoom en iOS */
+                font-size: 16px;
             }
             
             .refresh-btn {
@@ -498,135 +504,15 @@
                 line-height: 1.3;
             }
             
-            .back-btn {
-                padding: 6px 12px;
-                font-size: 0.8rem;
-                border-radius: 20px;
-            }
-            
-            .filters {
-                padding: 12px;
-                gap: 10px;
-                margin-bottom: 12px;
-            }
-            
-            .filter-input {
-                padding: 10px 12px;
-                font-size: 16px; /* iOS zoom fix */
-            }
-            
-            .refresh-btn {
-                padding: 12px;
-                font-size: 0.9rem;
-            }
-            
             .stats-grid {
                 grid-template-columns: 1fr;
                 gap: 8px;
                 margin-bottom: 15px;
             }
             
-            .stat-card {
-                padding: 12px 8px;
-            }
-            
-            .stat-value {
-                font-size: 1.3rem;
-                margin-bottom: 4px;
-            }
-            
-            .stat-label {
-                font-size: 0.75rem;
-                margin-bottom: 2px;
-            }
-            
-            .stat-change {
-                font-size: 0.7rem;
-            }
-            
-            .charts-grid {
-                gap: 12px;
-                margin-bottom: 15px;
-            }
-            
-            .chart-card {
-                padding: 12px;
-            }
-            
-            .chart-title {
-                font-size: 0.9rem;
-                margin-bottom: 10px;
-            }
-            
-            .chart-wrapper {
-                height: 180px;
-            }
-            
-            .predictions {
-                padding: 15px 10px;
-                margin-bottom: 15px;
-            }
-            
-            .predictions h3 {
-                font-size: 1.1rem;
-                margin-bottom: 12px;
-            }
-            
             .predictions-grid {
                 grid-template-columns: 1fr;
                 gap: 8px;
-            }
-            
-            .prediction-card {
-                padding: 10px;
-            }
-            
-            .prediction-value {
-                font-size: 1.1rem;
-                margin-bottom: 3px;
-            }
-            
-            .prediction-label {
-                font-size: 0.7rem;
-                line-height: 1.2;
-            }
-            
-            .top-products {
-                padding: 15px 10px;
-            }
-            
-            .top-products h3 {
-                font-size: 1.1rem;
-                margin-bottom: 12px;
-            }
-            
-            .product-item {
-                padding: 10px;
-                margin-bottom: 8px;
-            }
-            
-            .product-name {
-                font-size: 0.85rem;
-                line-height: 1.2;
-            }
-            
-            .product-stats {
-                font-size: 0.75rem;
-            }
-        }
-
-        /* Mejoras táctiles */
-        @media (hover: none) and (pointer: coarse) {
-            .refresh-btn {
-                min-height: 44px;
-            }
-            
-            .filter-input {
-                min-height: 44px;
-            }
-            
-            .back-btn {
-                min-height: 44px;
             }
         }
     </style>
@@ -643,7 +529,7 @@
         <div class="filters">
             <div class="filter-group">
                 <label for="tipoReporte">Período:</label>
-                <select id="tipoReporte" class="filter-input" onchange="cargarDatos()">
+                <select id="tipoReporte" class="filter-input">
                     <option value="hoy">Hoy</option>
                     <option value="semanal">Esta Semana</option>
                     <option value="mensual">Este Mes</option>
@@ -651,7 +537,7 @@
             </div>
             <div class="filter-group">
                 <label for="fechaEspecifica">Fecha específica:</label>
-                <input type="date" id="fechaEspecifica" class="filter-input" onchange="cargarDatos()">
+                <input type="date" id="fechaEspecifica" class="filter-input">
             </div>
             <button class="refresh-btn" onclick="cargarTodo()">🔄 Actualizar Datos</button>
         </div>
@@ -662,7 +548,7 @@
         <!-- Gráficos principales -->
         <div class="charts-grid">
             <div class="chart-card">
-                <div class="chart-title">☕ Tendencia de Ventas (30 días)</div>
+                <div class="chart-title">☕ Tendencia de Ventas (7 días)</div>
                 <div class="chart-wrapper">
                     <canvas id="tendenciaChart"></canvas>
                 </div>
@@ -691,36 +577,44 @@
     <script>
         let charts = {};
 
-        // Configuración de zona horaria Colombia
-        const timeZone = 'America/Bogota';
-
         // Inicializar
         document.addEventListener('DOMContentLoaded', function() {
-            const fechaHoy = new Date().toLocaleDateString('en-CA'); // Formato YYYY-MM-DD
+            const fechaHoy = new Date().toLocaleDateString('en-CA');
             document.getElementById('fechaEspecifica').value = fechaHoy;
             cargarTodo();
         });
 
         async function cargarTodo() {
             mostrarCargando('mainStats');
-            await cargarDatos();
-            await cargarPredicciones();
+            try {
+                await cargarDatos();
+                await cargarPredicciones();
+            } catch (error) {
+                console.error('Error general:', error);
+                mostrarError('mainStats', 'Error al cargar datos del sistema');
+            }
         }
 
         async function cargarDatos() {
             try {
-                // Cargar dashboard y reportes
+                console.log('Cargando datos del dashboard...');
+                
                 const [dashboardRes, semanalRes] = await Promise.all([
                     fetch('/api/reportes/avanzados/dashboard'),
                     fetch('/api/reportes/avanzados/semanal')
                 ]);
 
-                if (!dashboardRes.ok || !semanalRes.ok) {
-                    throw new Error('Error en la respuesta del servidor');
+                if (!dashboardRes.ok) {
+                    throw new Error(`Dashboard error: ${dashboardRes.status}`);
+                }
+                if (!semanalRes.ok) {
+                    throw new Error(`Semanal error: ${semanalRes.status}`);
                 }
 
                 const dashboard = await dashboardRes.json();
                 const semanal = await semanalRes.json();
+
+                console.log('Datos recibidos:', { dashboard, semanal });
 
                 mostrarEstadisticas(dashboard);
                 crearGraficos(dashboard, semanal);
@@ -728,24 +622,27 @@
 
             } catch (error) {
                 console.error('Error cargando datos:', error);
-                mostrarError('mainStats', 'Error al cargar datos: ' + error.message);
+                throw error;
             }
         }
 
         async function cargarPredicciones() {
             try {
+                console.log('Cargando predicciones...');
+                
                 const response = await fetch('/api/reportes/avanzados/predicciones');
                 
                 if (!response.ok) {
-                    throw new Error('Error al cargar predicciones');
+                    throw new Error(`Predicciones error: ${response.status}`);
                 }
                 
                 const predicciones = await response.json();
                 mostrarPredicciones(predicciones);
+                
             } catch (error) {
                 console.error('Error cargando predicciones:', error);
                 document.getElementById('prediccionesGrid').innerHTML = 
-                    '<div class="loading" style="color: #C62828;">Error al cargar predicciones</div>';
+                    '<div class="error-message">Error al cargar predicciones</div>';
             }
         }
 
@@ -753,7 +650,7 @@
             const container = document.getElementById('mainStats');
             
             if (!data || !data.hoy) {
-                container.innerHTML = '<div class="loading">No hay datos disponibles</div>';
+                container.innerHTML = '<div class="error-message">No hay datos disponibles</div>';
                 return;
             }
 
@@ -812,9 +709,7 @@
             container.innerHTML = html;
         }
 
-        // ==================== GRÁFICOS ====================
         function crearGraficos(dashboard, semanal) {
-            // Configuración de colores café
             const coloresCafe = {
                 primary: '#8B4513',
                 secondary: '#A0522D',
@@ -822,7 +717,7 @@
                 light: '#D2B48C'
             };
 
-            // Gráfico de tendencia (últimos 30 días)
+            // Gráfico de tendencia
             const ctxTendencia = document.getElementById('tendenciaChart').getContext('2d');
             
             if (charts.tendencia) {
@@ -835,6 +730,7 @@
                 type: 'line',
                 data: {
                     labels: tendenciaData.map(d => {
+                        if (!d.fecha_venta) return 'N/A';
                         const fecha = new Date(d.fecha_venta + 'T00:00:00');
                         return fecha.toLocaleDateString('es-CO', { month: 'short', day: 'numeric' });
                     }),
@@ -914,7 +810,7 @@
                         borderColor: coloresCafe.primary,
                         borderWidth: 2,
                         borderRadius: 8,
-                        borderSkipped: false,
+                        borderSkipped: false
                     }]
                 },
                 options: {
@@ -952,9 +848,8 @@
         function mostrarPredicciones(data) {
             const container = document.getElementById('prediccionesGrid');
             
-            // Verificar que data existe y tiene las propiedades necesarias
             if (!data || !data.prediccionesSemanales || !data.prediccionesMensuales) {
-                container.innerHTML = '<div class="loading" style="color: #C62828;">Error: No se pudieron cargar las predicciones</div>';
+                container.innerHTML = '<div class="error-message">Error: No se pudieron cargar las predicciones</div>';
                 return;
             }
             
@@ -1005,7 +900,6 @@
             container.innerHTML = html;
         }
 
-        // Función para agregar emojis a productos de cafetería
         function getProductEmoji(nombre, index) {
             const nombreLower = nombre.toLowerCase();
             
@@ -1022,7 +916,6 @@
             if (nombreLower.includes('sandwich') || nombreLower.includes('sándwich')) return '🥪';
             if (nombreLower.includes('empanada')) return '🥟';
             
-            // Emojis por posición si no hay coincidencias
             const emojis = ['🥇', '🥈', '🥉', '🏅', '⭐'];
             return emojis[index] || '🍴';
         }
@@ -1047,17 +940,11 @@
         function mostrarError(containerId, mensaje) {
             const container = document.getElementById(containerId);
             container.innerHTML = `
-                <div class="loading" style="color: #C62828;">
+                <div class="error-message">
                     ⚠️ ${mensaje}
                 </div>
             `;
         }
-
-        // Función para manejar errores de carga de datos
-        window.addEventListener('unhandledrejection', function(event) {
-            console.error('Error no manejado:', event.reason);
-            mostrarError('mainStats', 'Error de conexión. Por favor, recarga la página.');
-        });
 
         // Auto-actualización cada 5 minutos durante horario de trabajo (6 AM - 12 PM Colombia)
         setInterval(function() {
@@ -1107,7 +994,9 @@
             
             // Remover después de 3 segundos
             setTimeout(() => {
-                timeElement.remove();
+                if (timeElement.parentNode) {
+                    timeElement.remove();
+                }
             }, 3000);
         }
 
@@ -1117,6 +1006,16 @@
             await originalCargarTodo();
             mostrarUltimaActualizacion();
         };
+
+        // Manejo de errores globales
+        window.addEventListener('unhandledrejection', function(event) {
+            console.error('Error no manejado:', event.reason);
+            mostrarError('mainStats', 'Error de conexión. Por favor, recarga la página.');
+        });
+
+        window.addEventListener('error', function(event) {
+            console.error('Error JavaScript:', event.error);
+        });
     </script>
 </body>
 </html>
